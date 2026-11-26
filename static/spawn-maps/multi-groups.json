@@ -1,0 +1,693 @@
+{
+  "25": {
+    "key": "25",
+    "group_id": 25,
+    "name": "大牙狸",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-field-bidoof.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.405405,
+        "y": 0.191763
+      }
+    ]
+  },
+  "33": {
+    "key": "33",
+    "group_id": 33,
+    "name": "小猫怪",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-shinx.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.464929,
+        "y": 0.082368
+      }
+    ]
+  },
+  "35": {
+    "key": "35",
+    "group_id": 35,
+    "name": "泳圈鼬",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-buizel.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.691978,
+        "y": 0.216216
+      }
+    ]
+  },
+  "49": {
+    "key": "49",
+    "group_id": 49,
+    "name": "大牙狸/伊布",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-eevee.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.528958,
+        "y": 0.098456
+      }
+    ]
+  },
+  "50": {
+    "key": "50",
+    "group_id": 50,
+    "name": "拉鲁拉丝/含羞苞/毒蔷薇",
+    "region": "红莲湿地",
+    "map": "CrimsonMirelands",
+    "image": "spawnpoint-budew.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.248789,
+        "y": 0.621312
+      }
+    ]
+  },
+  "56": {
+    "key": "56",
+    "group_id": 56,
+    "name": "熊宝宝/圈圈熊",
+    "region": "天冠山麓",
+    "map": "CoronetHighlands",
+    "image": "spawnpoint-teddiursa.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.679877,
+        "y": 0.675914
+      }
+    ]
+  },
+  "85": {
+    "key": "85",
+    "group_id": 85,
+    "name": "小拳石",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-geodude.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.719005,
+        "y": 0.357143
+      },
+      {
+        "x": 0.577435,
+        "y": 0.39039
+      }
+    ]
+  },
+  "91": {
+    "key": "91",
+    "group_id": 91,
+    "name": "不良蛙",
+    "region": "红莲湿地",
+    "map": "CrimsonMirelands",
+    "image": "spawnpoint-croagunk.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.503743,
+        "y": 0.6321
+      }
+    ]
+  },
+  "117": {
+    "key": "117",
+    "group_id": 117,
+    "name": "沙河马/河马兽",
+    "region": "红莲湿地",
+    "map": "CrimsonMirelands",
+    "image": "spawnpoint-hippopotas.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.440335,
+        "y": 0.550418
+      }
+    ]
+  },
+  "129": {
+    "key": "129",
+    "group_id": 129,
+    "name": "皮卡丘/皮丘/圆法师",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-pichu.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.792149,
+        "y": 0.596525
+      }
+    ]
+  },
+  "161": {
+    "key": "161",
+    "group_id": 161,
+    "name": "黑暗鸦（仅夜晚）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-murkrow.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": true,
+    "points": [
+      {
+        "x": 0.422501,
+        "y": 0.410172
+      }
+    ]
+  },
+  "182": {
+    "key": "182",
+    "group_id": 182,
+    "name": "派拉斯/派拉斯特",
+    "region": "红莲湿地",
+    "map": "CrimsonMirelands",
+    "image": "spawnpoint-paras.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.2893,
+        "y": 0.172831
+      }
+    ]
+  },
+  "183": {
+    "key": "183",
+    "group_id": 183,
+    "name": "卷卷耳/可达鸭",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-buneary.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.771557,
+        "y": 0.857357
+      }
+    ]
+  },
+  "203": {
+    "key": "203",
+    "group_id": 203,
+    "name": "毛头小鹰",
+    "region": "纯白冻土",
+    "map": "AlabasterIcelands",
+    "image": "spawnpoint-rufflet.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.51343,
+        "y": 0.120211
+      },
+      {
+        "x": 0.514311,
+        "y": 0.141347
+      }
+    ]
+  },
+  "234": {
+    "key": "234",
+    "group_id": 234,
+    "name": "狩猎凤蝶/绅士蛾",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-beautifly.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.837623,
+        "y": 0.179537
+      }
+    ]
+  },
+  "245": {
+    "key": "245",
+    "group_id": 245,
+    "name": "小山猪/长毛猪",
+    "region": "纯白冻土",
+    "map": "AlabasterIcelands",
+    "image": "spawnpoint-swinub.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.358432,
+        "y": 0.659181
+      }
+    ]
+  },
+  "246": {
+    "key": "246",
+    "group_id": 246,
+    "name": "姆克儿/姆克鸟",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-starly.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.353282,
+        "y": 0.868726
+      },
+      {
+        "x": 0.255684,
+        "y": 0.87559
+      }
+    ]
+  },
+  "247": {
+    "key": "247",
+    "group_id": 247,
+    "name": "长尾怪手",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-aipom.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.286572,
+        "y": 0.812956
+      }
+    ]
+  },
+  "253": {
+    "key": "253",
+    "group_id": 253,
+    "name": "无壳海兔/海兔兽",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-shellos.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.247533,
+        "y": 0.820678
+      }
+    ]
+  },
+  "273": {
+    "key": "273",
+    "group_id": 273,
+    "name": "凯西/勇基拉",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-abra.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.229515,
+        "y": 0.70592
+      }
+    ]
+  },
+  "278": {
+    "key": "278",
+    "group_id": 278,
+    "name": "伦琴猫",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-luxray.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.188945,
+        "y": 0.32217
+      },
+      {
+        "x": 0.232516,
+        "y": 0.356943
+      },
+      {
+        "x": 0.278181,
+        "y": 0.427745
+      },
+      {
+        "x": 0.243408,
+        "y": 0.575214
+      }
+    ]
+  },
+  "279": {
+    "key": "279",
+    "group_id": 279,
+    "name": "姆克鹰",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-staraptor.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.194552,
+        "y": 0.600601
+      },
+      {
+        "x": 0.281424,
+        "y": 0.51094
+      }
+    ]
+  },
+  "284": {
+    "key": "284",
+    "group_id": 284,
+    "name": "鲤鱼王/暴鲤龙",
+    "region": "黑曜原野",
+    "map": "ObsidianFieldlands",
+    "image": "spawnpoint-magikarp.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.168626,
+        "y": 0.393811
+      }
+    ]
+  },
+  "344": {
+    "key": "344",
+    "group_id": 344,
+    "name": "野蛮鲈鱼",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-basculin.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.911052,
+        "y": 0.025319
+      },
+      {
+        "x": 0.93395,
+        "y": 0.057023
+      },
+      {
+        "x": 0.967635,
+        "y": 0.03919
+      }
+    ]
+  },
+  "356": {
+    "key": "356",
+    "group_id": 356,
+    "name": "魅力喵/东施喵",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-glameow.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.214663,
+        "y": 0.866579
+      }
+    ]
+  },
+  "367": {
+    "key": "367",
+    "group_id": 367,
+    "name": "百合根娃娃",
+    "region": "红莲湿地",
+    "map": "CrimsonMirelands",
+    "image": "spawnpoint-petilil.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.53897,
+        "y": 0.860414
+      }
+    ]
+  },
+  "382": {
+    "key": "382",
+    "group_id": 382,
+    "name": "音箱蟀",
+    "region": "红莲湿地",
+    "map": "CrimsonMirelands",
+    "image": "spawnpoint-kricketune.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.163144,
+        "y": 0.603919
+      }
+    ]
+  },
+  "390": {
+    "key": "390",
+    "group_id": 390,
+    "name": "三蜜蜂",
+    "region": "红莲湿地",
+    "map": "CrimsonMirelands",
+    "image": "spawnpoint-combee.png",
+    "maxalive": 2,
+    "has_night": true,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.21114,
+        "y": 0.65852
+      },
+      {
+        "x": 0.158741,
+        "y": 0.677455
+      }
+    ]
+  },
+  "362-3a": {
+    "key": "362-3a",
+    "group_id": 362,
+    "name": "千针鱼（3-3 · 左）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-coast-qwilfish-3-3-b.png",
+    "maxalive": 3,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.749379,
+        "y": 0.06261
+      },
+      {
+        "x": 0.779853,
+        "y": 0.03269
+      }
+    ]
+  },
+  "362-3b": {
+    "key": "362-3b",
+    "group_id": 362,
+    "name": "千针鱼（3-3 · 右）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-qwilfish.png",
+    "maxalive": 3,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.482106,
+        "y": 0.175852
+      },
+      {
+        "x": 0.465419,
+        "y": 0.141634
+      }
+    ]
+  },
+  "267-2": {
+    "key": "267-2",
+    "group_id": 267,
+    "name": "玛瑙水母（2-2）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-coast-tentacool-2-2.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.380477,
+        "y": 0.119028
+      },
+      {
+        "x": 0.410062,
+        "y": 0.117308
+      },
+      {
+        "x": 0.39699,
+        "y": 0.137949
+      },
+      {
+        "x": 0.402494,
+        "y": 0.194711
+      },
+      {
+        "x": 0.428295,
+        "y": 0.201591
+      },
+      {
+        "x": 0.408686,
+        "y": 0.217416
+      }
+    ]
+  },
+  "267-3a": {
+    "key": "267-3a",
+    "group_id": 267,
+    "name": "玛瑙水母（3-3 · 上）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-coast-tentacool-3-3-b.png",
+    "maxalive": 3,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.560546,
+        "y": 0.055702
+      },
+      {
+        "x": 0.601057,
+        "y": 0.081902
+      },
+      {
+        "x": 0.619771,
+        "y": 0.053721
+      }
+    ]
+  },
+  "362-2": {
+    "key": "362-2",
+    "group_id": 362,
+    "name": "千针鱼（2-2）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-coast-qwilfish-2-2.png",
+    "maxalive": 2,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.467856,
+        "y": 0.126424
+      }
+    ]
+  },
+  "267-3b": {
+    "key": "267-3b",
+    "group_id": 267,
+    "name": "玛瑙水母（3-3 · 中）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-coast-tentacool-3-3-c.png",
+    "maxalive": 3,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.655881,
+        "y": 0.17938
+      },
+      {
+        "x": 0.621598,
+        "y": 0.212625
+      },
+      {
+        "x": 0.52983,
+        "y": 0.229247
+      },
+      {
+        "x": 0.541258,
+        "y": 0.273572
+      },
+      {
+        "x": 0.497971,
+        "y": 0.256258
+      }
+    ]
+  },
+  "267-3c": {
+    "key": "267-3c",
+    "group_id": 267,
+    "name": "玛瑙水母（3-3 · 下）",
+    "region": "群青海岸",
+    "map": "CobaltCoastlands",
+    "image": "spawnpoint-tentacool.png",
+    "maxalive": 3,
+    "has_night": false,
+    "night_only": false,
+    "points": [
+      {
+        "x": 0.498239,
+        "y": 0.175914
+      },
+      {
+        "x": 0.50022,
+        "y": 0.21048
+      }
+    ]
+  }
+}

@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>洗翠闪光路径档案 · PLA MMO Path Finder · 君粒</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.5') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.5') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.5') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.5') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.5-multi19') }}">
+</head>
+<body data-theme="{{ appearance_theme|default('forest') }}"
+      data-appearance-saved="{{ '1' if appearance_preferences_saved|default(false) else '0' }}"
+      data-fs="auto"
+      class="{{ 'dark-mode' if appearance_mode|default('light') == 'dark' else '' }}">
+  <script>
+    // Before server-side appearance settings have been migrated, reuse the
+    // previous release's WebView localStorage preference to avoid a one-time reset.
+    (function () {
+      if (document.body.dataset.appearanceSaved === "1") return;
+      try {
+        var allowedThemes = ["forest", "ocean", "snow", "lavender", "amber"];
+        var savedTheme = localStorage.getItem("pla-mmo-theme");
+        var savedMode = localStorage.getItem("pla-mmo-mode");
+        if (allowedThemes.indexOf(savedTheme) !== -1) document.body.dataset.theme = savedTheme;
+        if (savedMode === "dark") document.body.classList.add("dark-mode");
+        else if (savedMode === "light") document.body.classList.remove("dark-mode");
+      } catch (_) { /* Server-rendered defaults remain available. */ }
+    })();
+  </script>
+  <div class="app-shell">
+    <header class="site-header">
+    <div class="topbar">
+      <div class="brand" aria-label="宝可梦传说 阿尔宙斯 闪光路线计算器">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="brand-copy">
+          <span class="brand-name">宝可梦传说 阿尔宙斯</span>
+          <span class="brand-divider" aria-hidden="true"></span>
+          <span class="brand-product">闪光路线计算器</span>
+        </span>
+      </div>
+      <div class="header-actions">
+        <span class="header-caption">探索、记录，与闪光相遇。</span>
+        <div class="fs-quick-wrap" style="position:relative;">
+          <button id="fs-quick-button" class="fs-quick-button" type="button" aria-label="界面字号（快捷调整，设置中心也有完整选项）" title="界面字号 · 快捷调整" aria-haspopup="menu" aria-expanded="false" aria-controls="fs-quick-menu">Aa</button>
+          <div id="fs-quick-menu" class="fs-menu" role="menu" aria-label="界面字号档位" hidden>
+            <div class="fs-menu-heading">界面字号</div>
+            <button class="fs-menu-item" type="button" role="menuitemradio" data-fs-choice="auto" aria-checked="true"><span><strong>自动适应</strong><small>按屏幕大小自动调整（推荐）</small></span><span class="fs-menu-check">✓</span></button>
+            <button class="fs-menu-item" type="button" role="menuitemradio" data-fs-choice="compact" aria-checked="false"><span><strong>紧凑</strong><small>字更小，显示更多内容</small></span><span class="fs-menu-check">✓</span></button>
+            <button class="fs-menu-item" type="button" role="menuitemradio" data-fs-choice="standard" aria-checked="false"><span><strong>标准</strong><small>原始字号，不缩放</small></span><span class="fs-menu-check">✓</span></button>
+            <button class="fs-menu-item" type="button" role="menuitemradio" data-fs-choice="comfort" aria-checked="false"><span><strong>舒适</strong><small>比标准稍大</small></span><span class="fs-menu-check">✓</span></button>
+            <button class="fs-menu-item" type="button" role="menuitemradio" data-fs-choice="large" aria-checked="false"><span><strong>大字号</strong><small>适合 2K 高分屏</small></span><span class="fs-menu-check">✓</span></button>
+            <button class="fs-menu-item" type="button" role="menuitemradio" data-fs-choice="xlarge" aria-checked="false"><span><strong>超大字号</strong><small>最大，最易读</small></span><span class="fs-menu-check">✓</span></button>
+          </div>
+        </div>
+        <button id="open-settings" class="settings-toggle" data-open-settings type="button" aria-label="打开设置中心（主题、字号、宝可梦与资源）" title="设置中心 · 主题 / 字号 / 宝可梦 / 资源" aria-haspopup="dialog" aria-controls="settings-modal">⚙</button>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换深色模式" title="切换深色模式">☾</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="pokemon-assets-global-progress" class="asset-global-progress hidden" aria-live="polite">
+    <div class="asset-global-progress-copy">
+      <span><strong>正在准备宝可梦图片资源</strong><small id="pokemon-assets-global-detail">下载在后台进行，不影响计算。</small></span>
+      <strong id="pokemon-assets-global-percent">0%</strong>
+    </div>
+    <div class="asset-progress-track"><div id="pokemon-assets-global-bar" class="asset-progress-bar" style="width:0%"></div></div>
+  </div>
+
+    <main>
+      <section id="diagnostics-banner" class="diagnostics-banner hidden" role="alert" aria-live="polite">
+        <div class="diagnostics-banner-copy">
+          <strong id="diagnostics-banner-title">检测到本地计算问题</strong>
+          <p id="diagnostics-banner-message">本地引擎尚未通过检查。请复制诊断报告以便排查。</p>
+        </div>
+        <div class="diagnostics-banner-actions">
+          <button id="fix-engine-banner" class="btn btn-primary" type="button">修复本地引擎</button>
+          <button id="copy-diagnostics-banner" class="btn btn-secondary" type="button">复制诊断报告</button>
+          <button class="btn btn-ghost" type="button" data-open-settings data-settings-target="resources">查看设置</button>
+        </div>
+      </section>
+
+      <section id="test-view" class="view active workspace">
+        <aside class="sidebar">
+
+
+          <section class="seed-control-card" aria-label="Seed 输入与联机测 Seed">
+          <section id="link-quick-panel" class="link-quick-panel" aria-label="联机测 Seed 快捷面板">
+            <div class="link-quick-head">
+              <button id="link-quick-toggle" class="link-quick-toggle" type="button" aria-expanded="false" aria-controls="link-quick-body">
+                <span class="link-quick-icon" aria-hidden="true">⇄</span>
+                <span class="link-quick-title">
+                  <strong>联机测 Seed</strong>
+                  <small id="link-quick-summary">点此展开，快捷采集 2–4 只</small>
+                </span>
+                <span id="link-quick-badge" class="status-pill status-muted">0/4</span>
+                <span class="link-quick-chevron" aria-hidden="true">⌄</span>
+              </button>
+              <button id="link-quick-detail" class="link-quick-detail" type="button">详细页面</button>
+            </div>
+            <div id="link-quick-body" class="link-quick-body hidden">
+              <div id="link-quick-slots" class="link-quick-slots">
+                <div class="link-quick-slot" data-index="0">
+                  <div class="link-quick-art"><img alt="" hidden><span aria-hidden="true">?</span></div>
+                  <strong>等待</strong>
+                </div>
+                <div class="link-quick-slot" data-index="1">
+                  <div class="link-quick-art"><img alt="" hidden><span aria-hidden="true">?</span></div>
+                  <strong>等待</strong>
+                </div>
+                <div class="link-quick-slot" data-index="2">
+                  <div class="link-quick-art"><img alt="" hidden><span aria-hidden="true">?</span></div>
+                  <strong>等待</strong>
+                </div>
+                <div class="link-quick-slot" data-index="3">
+                  <div class="link-quick-art"><img alt="" hidden><span aria-hidden="true">?</span></div>
+                  <strong>等待</strong>
+                </div>
+              </div>
+              <div class="link-quick-progress">
+                <div class="link-quick-progress-head"><span id="link-quick-status">尚未开始</span><small id="link-quick-percent">0/4</small></div>
+                <div class="link-quick-bar" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" id="link-quick-bar">
+                  <span id="link-quick-bar-fill"></span>
+                </div>
+                <small id="link-quick-meta">插好无线板后开始</small>
+              </div>
+              <div class="link-quick-password"><span>联机密码</span><strong>11111111</strong></div>
+              <div class="link-quick-actions">
+                <button id="link-quick-start" class="link-seed-button link-seed-button-primary" type="button" data-state="idle" aria-live="polite">点击启动</button>
+              </div>
+              <div id="link-quick-error" class="link-seed-error hidden" role="alert"></div>
+              <p class="link-quick-hint">祝庆村交换 NPC → 本地交换 → 输入相同密码；进入确认页后按 B，不要确认交换。</p>
+            </div>
+          </section>
+
+          <section class="manual-seed-card" aria-labelledby="manual-seed-title">
+            <div class="manual-seed-head">
+              <label id="manual-seed-title" for="quick-seed">种子（Seed）</label>
+              <span id="manual-seed-source">手动输入</span>
+            </div>
+            <div class="manual-seed-row">
+              <input id="quick-seed" type="text" inputmode="numeric" autocomplete="off" placeholder="输入或粘贴 Seed">
+              <button id="apply-quick-seed" class="btn btn-primary" type="button">应用</button>
+            </div>
+            <div class="manual-seed-foot">
+              <span id="seed-status" class="status-pill status-muted">未输入</span>
+              <button id="copy-seed" class="text-button" type="button">复制 Seed</button>
+            </div>
+            <div id="seed-error" class="inline-error hidden"></div>
+            <div class="seed-meta-hidden" aria-hidden="true"><span id="current-seed">尚未读取</span></div>
+          </section>
+          </section>
+
+          <form id="calculate-form" class="panel form-panel">
+            <div class="form-scroll-region">
+            <div class="sidebar-panel-heading">
+              <div>
+                <span class="eyebrow">路线参数</span>
+                <h2>计算设置</h2>
+                <p>输入 Seed 与群体条件，计算闪光出现的路径。</p>
+              </div>
+            </div>
+
+            <div class="type-box">
+              <div class="field field-wide">
+                <label for="appearance">大量出现类型</label>
+                <select id="appearance" aria-describedby="mode-hint">
+                  <option value="normal">普通大量出现</option>
+                  <option value="mmo">大大量出现</option>
+                  <option value="mmo_bonus" selected>大大量出现两波</option>
+                  <option value="spawn_alpha">定点头目（单只生成点）</option>
+                  <option value="spawn_multi">多只生成点（同一 Seed 路径）</option>
+                </select>
+              </div>
+              <p id="mode-hint" class="field-note">大大量出现两波：自动启用第二轮，并填写第二轮数量与宝可梦。</p>
+            </div>
+            <input id="isnormal" class="legacy-state-input" type="checkbox" hidden aria-hidden="true" tabindex="-1">
+            <input id="isbonus" class="legacy-state-input" type="checkbox" checked hidden aria-hidden="true" tabindex="-1">
+
+            <div class="form-grid">
+              <div id="first-fields" class="bonus-grid subpanel">
+                <div class="field">
+                  <label for="frspawns">第一轮生成数量</label>
+                  <select id="frspawns" required>
+                    <option value="9" selected>9 只</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="frpokemon-search-input">第一轮宝可梦</label>
+                  <select id="frpokemon" required>
+                    <option value="">正在加载候选列表…</option>
+                  </select>
+                </div>
+              </div>
+              <div id="bonus-fields" class="bonus-grid subpanel">
+                <div class="field">
+                  <label for="brspawns">第二轮生成数量</label>
+                  <select id="brspawns">
+                    <option value="6" selected>6 只</option>
+                    <option value="7">7 只</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="brpokemon-search-input">第二轮宝可梦</label>
+                  <select id="brpokemon">
+                    <option value="">请先选择第一轮宝可梦</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="bonus-grid subpanel">
+                <div class="field">
+                  <label for="filter">计算筛选条件</label>
+                  <select id="filter">
+                    <option value="is_shiny">只看闪光</option>
+                    <option value="is_square_shiny">只看方形闪光</option>
+                    <option value="is_alpha">只看头目</option>
+                    <option value="is_perfect">只看 6V</option>
+                    <option value="has_5ivs">5V 及以上</option>
+                    <option value="no_attack">0 攻击个体值</option>
+                    <option value="has_no_attack_5iv_over_30">0 攻击、5 项 30+ IV</option>
+                    <option value="has_no_attack_5iv">0 攻击、5V</option>
+                    <option value="no_speed">0 速度个体值</option>
+                    <option value="has_no_speed_5iv_over_30">0 速度、5 项 30+ IV</option>
+                    <option value="has_no_speed_5iv">0 速度、5V</option>
+                    <option value="has_6iv_over_30">6 项 30+ IV</option>
+                    <option value="has_5iv_over_30">5 项 30+ IV</option>
+                    <option value="has_no_speed_no_attack">0 速度和 0 攻击</option>
+                    <option value="has_no_speed_no_attack_4iv_over_30">0 速度、0 攻击、4 项 30+ IV</option>
+                    <option value="has_no_speed_no_attack_4iv">0 速度、0 攻击、4V</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div id="spawn-input-mode" class="spawn-input-mode hidden" role="group" aria-label="定点信息输入模式">
+              <button id="spawn-mode-auto" class="spawn-mode-button active" type="button" aria-pressed="true">自动收录</button>
+              <button id="spawn-mode-manual" class="spawn-mode-button" type="button" aria-pressed="false">手动输入</button>
+            </div>
+            <div id="spawn-auto-summary" class="spawn-auto-summary hidden">
+              <div class="spawn-auto-art" id="spawn-auto-art" aria-hidden="true">
+                <img id="spawn-auto-sprite" class="spawn-auto-sprite hidden" alt="">
+                <span id="spawn-auto-art-fallback" class="spawn-auto-art-fallback hidden">✦</span>
+              </div>
+              <div class="spawn-auto-copy">
+                <span class="spawn-auto-kicker">已选择宝可梦</span>
+                <strong id="spawn-auto-species">点击地图头像选择</strong>
+                <p id="spawn-auto-meta">选择位置后自动填入地图、spawner、性别比例和白天/夜晚。</p>
+              </div>
+            </div>
+
+            <div id="spawn-fields" class="spawn-fields hidden">
+              <div class="bonus-grid subpanel">
+                <div class="field">
+                  <label for="spawn-species">宝可梦</label>
+                  <select id="spawn-species"></select>
+                </div>
+                <div class="field">
+                  <label for="spawn-spawner">生成点（spawner）</label>
+                  <select id="spawn-spawner"></select>
+                </div>
+              </div>
+              <p id="spawner-location-note" class="field-note spawner-location-note hidden"></p>
+
+              <div class="bonus-grid subpanel">
+                <div class="field">
+                  <label for="spawn-gender-ratio">性别比例</label>
+                  <select id="spawn-gender-ratio"></select>
+                </div>
+                <label class="result-filter-option"><input id="spawn-alpha" type="checkbox" checked><span>定点头目（Static Alpha）</span></label>
+                <label class="result-filter-option"><input id="spawn-night" type="checkbox"><span>夜间</span></label>
+                <label class="result-filter-option"><input id="spawn-fixed-gender" type="checkbox"><span>固定性别 / 无性别</span></label>
+              </div>
+              <p id="spawn-roll-summary" class="field-note">闪光判定：使用设置中心的闪耀护符与研究等级。</p>
+
+              <div id="spawn-status" class="field-note" role="status" aria-live="polite"></div>
+              <div id="spawn-results" class="spawn-results"></div>
+            </div>
+
+            <div id="multi-fields" class="spawn-fields hidden">
+              <div class="bonus-grid subpanel">
+                <div class="field">
+                  <label for="multi-group">多只生成点</label>
+                  <select id="multi-group"></select>
+                </div>
+                <div class="field">
+                  <label for="multi-maxalive">同时生成数量</label>
+                  <select id="multi-maxalive">
+                    <option value="2" selected>2 只</option>
+                    <option value="3">3 只（仅 3-3 点位）</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="multi-depth">最大刷新次数</label>
+                  <select id="multi-depth">
+                    <option value="5">5</option>
+                    <option value="9" selected>9</option>
+                    <option value="12">12</option>
+                    <option value="16">16</option>
+                  </select>
+                  <p class="field-note">16 为实用上限；层数越高，路径数量增长越快。</p>
+                </div>
+                <div class="field">
+                  <label for="multi-filter">结果筛选</label>
+                  <select id="multi-filter">
+                    <option value="is_shiny" selected>只看闪光</option>
+                    <option value="is_alpha">只看头目</option>
+                    <option value="is_square_shiny">只看方块闪</option>
+                    <option value="is_shiny_alpha">闪光 + 头目</option>
+                    <option value="is_square_alpha">方块闪 + 头目</option>
+                    <option value="is_square_normal">方块闪 + 普通</option>
+                    <option value="all">全部路径</option>
+                  </select>
+                </div>
+              </div>
+              <label class="result-filter-option">
+                <input id="multi-night" type="checkbox">
+                <span>使用夜晚生成表</span>
+              </label>
+              <p id="multi-note" class="field-note">多只生成点按路径树计算；只显示命中的路径。</p>
+              <p id="multi-status" class="field-note" role="status" aria-live="polite"></p>
+              <div id="multi-results" class="spawn-results">
+                <div class="multi-empty-frame">
+                  <div class="empty-icon">✦</div>
+                  <h3>点击地图头像选择生成点</h3>
+                  <p>确认生成点后，点击下方「计算多只路径」。结果会显示在这里。</p>
+                </div>
+              </div>            </div>
+
+            <div id="species-warning" class="callout hidden"></div>
+
+            <section class="panel display-filter-panel">
+              <h3>结果筛选</h3>
+              <label class="result-filter-option"><input id="show-only-shiny" type="checkbox" checked><span>只显示闪光</span></label>
+              <label class="result-filter-option"><input id="show-only-alpha" type="checkbox"><span>只显示头目</span></label>
+              <label class="result-filter-option"><input id="show-default-path" type="checkbox"><span>只显示默认路径</span></label>
+              <label class="result-filter-option"><input id="show-multi-path" type="checkbox"><span>只显示多路径结果</span></label>
+            </section>
+            </div>
+            <div class="form-footer">
+              <p class="hint">结果来自实际计算接口；接口失败时不会用演示结果代替。</p>
+              <button id="calculate-button" class="btn btn-primary" type="submit">计算路径</button>
+            </div>
+          </form>
+        </aside>
+
+        <section id="results-column" class="results-column">
+
+
+          <div class="results-intro-panel">
+            <div class="shortcut-tip reading-note">
+              <span class="tip-mark">i</span>
+              <span><strong>阅读提示：</strong> 先看目标属性与路线概要；详细步骤按实际执行顺序展开，目标提示只出现在真实生成节点。</span>
+            </div>
+            <div class="section-heading results-heading">
+              <div>
+                <h2>计算结果</h2>
+                <p id="results-caption">根据 Seed 与群体条件，计算闪光目标的可执行路径。</p>
+              </div>
+              <div id="result-count" class="count-pill">0 条结果</div>
+            </div>
+            <div class="results-status-row">
+              <div id="calculation-message" class="message hidden"></div>
+              <div id="result-settings-summary" class="result-settings-summary hidden" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+
+          <section id="spawn-map-card" class="spawn-map-card hidden" aria-label="固定头目位置">
+            <div class="spawn-map-head">
+              <div class="spawn-map-heading">
+                <span class="eyebrow">FIXED ALPHA LOCATIONS</span>
+                <h2 id="spawn-map-title">头目位置</h2>
+                <select id="spawn-map" class="spawn-map-title-select" aria-label="切换地图"></select>
+                <p id="spawn-map-subtitle">点击地图上的地图名称可切换地图；点击宝可梦头像选择位置。</p>
+              </div>
+              <span id="spawn-map-count" class="count-pill">0 处</span>
+            </div>
+            <div id="spawn-map-stage" class="spawn-map-stage">
+              <div id="spawn-map-viewport" class="spawn-map-viewport">
+                <div id="spawn-map-world" class="spawn-map-world">
+                  <div id="spawn-map-inner" class="spawn-map-inner">
+                    <img id="spawn-map-image" alt="固定头目位置地图" draggable="false">
+                    <div id="spawn-map-markers" class="spawn-map-markers"></div>
+                    <div id="spawn-map-confirm" class="spawn-map-confirm hidden">
+                      <div class="spawn-map-confirm-copy">
+                        <strong id="spawn-map-confirm-title">选择一个位置</strong>
+                        <small id="spawn-map-confirm-meta"></small>
+                      </div>
+                      <label id="spawn-map-candidate-field" class="spawn-map-candidate hidden">
+                        <span>对应 spawner</span>
+                        <select id="spawn-map-candidate"></select>
+                      </label>
+                      <label id="spawn-map-time-field" class="spawn-map-time hidden">
+                        <span>时间</span>
+                        <select id="spawn-map-time">
+                          <option value="day">白天</option>
+                          <option value="night">夜晚</option>
+                        </select>
+                      </label>
+                      <div class="spawn-map-confirm-actions">
+                        <button id="spawn-map-confirm-button" class="btn btn-primary" type="button">确认这个位置</button>
+                        <button id="spawn-map-cancel" class="btn btn-ghost" type="button">取消</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="spawn-map-empty" class="spawn-map-empty hidden"></div>
+              <div class="spawn-map-zoom" role="group" aria-label="地图缩放控制">
+                <button id="spawn-map-zoom-out" class="spawn-map-zoom-btn" type="button" aria-label="缩小地图" title="缩小">−</button>
+                <span id="spawn-map-zoom-value" class="spawn-map-zoom-value" aria-live="polite">100%</span>
+                <button id="spawn-map-zoom-in" class="spawn-map-zoom-btn" type="button" aria-label="放大地图" title="放大">+</button>
+                <button id="spawn-map-zoom-reset" class="spawn-map-zoom-reset" type="button" title="恢复原始大小">复位</button>
+              </div>
+            </div>
+            <div class="spawn-map-legend">
+              <span>头像 = 宝可梦</span>
+              <span>右上角 = 头目</span>
+              <span>☀/🌙 = 白天/夜晚</span>
+            </div>
+            <div class="spawn-map-foot">
+              <p id="spawn-map-note" class="field-note">选择地图和宝可梦后显示固定头目位置。</p>
+              <span class="spawn-map-source">地图标记来源：Serebii.net</span>
+            </div>
+          </section>
+
+          <section id="multi-map-card" class="spawn-map-card multi-map-inline hidden" aria-label="多只生成点位置">
+            <div class="spawn-map-head">
+              <div class="spawn-map-heading">
+                <span class="eyebrow">多只生成点</span>
+                <h2 id="multi-map-title">多只生成点位置</h2>
+                <select id="multi-map-select" class="spawn-map-title-select" aria-label="切换地图"></select>
+                <p id="multi-map-subtitle">点击地图头像展开生成点信息，再选具体宝可梦；可滚轮放大、拖动地图。</p>
+              </div>
+              <span id="multi-map-count" class="count-pill">0 处</span>
+            </div>
+            <div id="multi-map-stage" class="spawn-map-stage">
+              <div id="multi-map-viewport" class="spawn-map-viewport">
+                <div id="multi-map-world" class="spawn-map-world">
+                  <div id="multi-map-inner" class="spawn-map-inner">
+                    <img id="multi-map-image" alt="多只生成点地图" draggable="false">
+                    <div id="multi-map-markers" class="spawn-map-markers"></div>
+                    <div id="multi-map-confirm" class="spawn-map-confirm hidden">
+                      <div class="spawn-map-confirm-copy">
+                        <strong id="multi-map-confirm-title">选择一个生成点</strong>
+                        <small id="multi-map-confirm-meta"></small>
+                      </div>
+                      <div class="spawn-map-confirm-actions">
+                        <button id="multi-map-confirm-select" class="btn btn-primary" type="button">确认选择</button>
+                        <button id="multi-map-cancel" class="btn btn-ghost" type="button">取消</button>
+                      </div>
+                      <p class="field-note">确认只切换生成点组，不会自动计算。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="multi-map-empty" class="spawn-map-empty hidden"></div>
+              <div class="spawn-map-zoom" role="group" aria-label="地图缩放控制">
+                <button id="multi-map-zoom-out" class="spawn-map-zoom-btn" type="button" aria-label="缩小地图" title="缩小">−</button>
+                <span id="multi-map-zoom-value" class="spawn-map-zoom-value" aria-live="polite">100%</span>
+                <button id="multi-map-zoom-in" class="spawn-map-zoom-btn" type="button" aria-label="放大地图" title="放大">+</button>
+                <button id="multi-map-zoom-reset" class="spawn-map-zoom-reset" type="button" title="恢复原始大小">复位</button>
+              </div>
+            </div>
+            <div class="spawn-map-legend">
+              <span>头像 = 生成点宝可梦</span>
+              <span>☀/🌙 = 白天/夜晚</span>
+              <span>右上角数字 = 同时生成数</span>
+            </div>
+            <div class="spawn-map-foot">
+              <p id="multi-map-note" class="field-note">选择地图后显示多只生成点；点击头像查看并选宝可梦。</p>
+              <span class="spawn-map-source">地图标记来源：Serebii.net</span>
+            </div>
+          </section>
+
+          <div id="results-list" class="results-list is-empty-state">
+            <div class="empty-state panel">
+              <div class="empty-icon">✦</div>
+              <h3>等待第一次计算</h3>
+              <p>在左侧确认 Seed、宝可梦与群体条件，再点击「计算路径」。研究等级与闪耀护符在设置中心统一管理。</p>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <div id="settings-modal" class="settings-modal-backdrop hidden" role="presentation" aria-hidden="true">
+        <section id="settings-view" class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1">
+        <div class="section-heading page-heading settings-dialog-heading">
+          <div>
+            <h2 id="settings-title">设置中心</h2>
+            <p>按分类管理外观主题、宝可梦参数与本地资源。</p>
+          </div>
+          <button id="close-settings" class="settings-close" type="button" aria-label="关闭设置" title="关闭设置">×</button>
+        </div>
+
+          <nav class="settings-tabs" role="tablist" aria-label="设置分类">
+            <button class="settings-tab-button active" type="button" role="tab" id="settings-tab-button-appearance" data-settings-tab="appearance" aria-controls="settings-tab-appearance" aria-selected="true" tabindex="0">外观主题</button>
+            <button class="settings-tab-button" type="button" role="tab" id="settings-tab-button-pokemon" data-settings-tab="pokemon" aria-controls="settings-tab-pokemon" aria-selected="false" tabindex="-1">宝可梦设置</button>
+            <button class="settings-tab-button" type="button" role="tab" id="settings-tab-button-resources" data-settings-tab="resources" aria-controls="settings-tab-resources" aria-selected="false" tabindex="-1">资源管理</button>
+            <button class="settings-tab-button" type="button" role="tab" id="settings-tab-button-help" data-settings-tab="help" aria-controls="settings-tab-help" aria-selected="false" tabindex="-1">帮助与诊断</button>
+          </nav>
+
+          <div class="settings-tab-content">
+            <section class="panel settings-panel settings-tab-panel active" id="settings-tab-appearance" role="tabpanel" aria-labelledby="settings-tab-button-appearance" data-settings-panel="appearance">
+          <section class="appearance-settings" aria-labelledby="appearance-settings-title">
+            <div class="settings-block-heading appearance-settings-heading">
+              <h3 id="appearance-settings-title">界面主题</h3>
+              <span class="muted">即时生效 · 自动保存</span>
+            </div>
+            <p class="field-note appearance-settings-description">选择你喜欢的主色调。每款主题都配有单独调校的夜间配色，切换不会影响计算参数或结果。</p>
+            <div class="theme-choice-grid" role="group" aria-label="选择界面主题">
+              <button class="theme-choice" type="button" data-theme-choice="forest" aria-pressed="true">
+                <span class="theme-swatches" aria-hidden="true"><i style="--swatch:#426c55"></i><i style="--swatch:#e8f0e6"></i></span>
+                <span class="theme-choice-copy"><strong>森林绿</strong><small>自然 · 经典</small></span>
+              </button>
+              <button class="theme-choice" type="button" data-theme-choice="ocean" aria-pressed="false">
+                <span class="theme-swatches" aria-hidden="true"><i style="--swatch:#356db3"></i><i style="--swatch:#e4effd"></i></span>
+                <span class="theme-choice-copy"><strong>海洋蓝</strong><small>清晰 · 专注</small></span>
+              </button>
+              <button class="theme-choice" type="button" data-theme-choice="snow" aria-pressed="false">
+                <span class="theme-swatches" aria-hidden="true"><i style="--swatch:#596b7e"></i><i style="--swatch:#eceff2"></i></span>
+                <span class="theme-choice-copy"><strong>纯净白</strong><small>极简 · 中性</small></span>
+              </button>
+              <button class="theme-choice" type="button" data-theme-choice="lavender" aria-pressed="false">
+                <span class="theme-swatches" aria-hidden="true"><i style="--swatch:#8060b2"></i><i style="--swatch:#efe7fa"></i></span>
+                <span class="theme-choice-copy"><strong>薰衣草紫</strong><small>柔和 · 安静</small></span>
+              </button>
+              <button class="theme-choice" type="button" data-theme-choice="amber" aria-pressed="false">
+                <span class="theme-swatches" aria-hidden="true"><i style="--swatch:#a66d31"></i><i style="--swatch:#f6ead8"></i></span>
+                <span class="theme-choice-copy"><strong>暖阳琥珀</strong><small>温暖 · 复古</small></span>
+              </button>
+            </div>
+            <div class="settings-block">
+              <div class="settings-block-heading">
+                <h3>界面字号</h3>
+                <span class="muted">即时生效 · 自动保存</span>
+              </div>
+              <p class="field-note">调整文字大小而不改变布局，底部按钮与地图位置保持固定。</p>
+              <div class="fs-settings-grid" role="group" aria-label="选择界面字号">
+                <button class="fs-option" type="button" data-fs-choice="auto" aria-pressed="true"><span><strong>自动适应</strong><small>按屏幕大小调整（推荐）</small></span></button>
+                <button class="fs-option" type="button" data-fs-choice="compact" aria-pressed="false"><span><strong>紧凑</strong><small>字更小</small></span></button>
+                <button class="fs-option" type="button" data-fs-choice="standard" aria-pressed="false"><span><strong>标准</strong><small>原始字号</small></span></button>
+                <button class="fs-option" type="button" data-fs-choice="comfort" aria-pressed="false"><span><strong>舒适</strong><small>稍大</small></span></button>
+                <button class="fs-option" type="button" data-fs-choice="large" aria-pressed="false"><span><strong>大字号</strong><small>适合 2K 屏</small></span></button>
+                <button class="fs-option" type="button" data-fs-choice="xlarge" aria-pressed="false"><span><strong>超大</strong><small>最易读</small></span></button>
+              </div>
+            </div>
+            <label class="appearance-mode-row" for="appearance-dark-mode">
+              <span><strong>夜间模式</strong><small>使用低亮度背景与柔和文字。</small></span>
+              <input id="appearance-dark-mode" type="checkbox">
+            </label>
+          </section>
+            </section>
+
+            <section class="panel settings-panel settings-tab-panel" id="settings-tab-pokemon" role="tabpanel" aria-labelledby="settings-tab-button-pokemon" data-settings-panel="pokemon" hidden>
+              <div class="pokemon-settings-layout">
+                <section class="settings-block pokemon-general-settings">
+                  <div class="settings-block-heading">
+                    <h3>通用设置</h3>
+                  </div>
+                  <label class="check-line setting-check-line" for="pokemon-shiny-charm">
+                    <input id="pokemon-shiny-charm" type="checkbox" checked disabled>
+                    <span>拥有闪耀护符</span>
+                  </label>
+                  <p class="field-note">此状态统一应用于路径计算。若所选宝可梦未达到研究等级 10，计算会提示条件冲突。</p>
+                </section>
+
+                <section class="settings-block pokemon-bulk-settings">
+                  <div class="settings-block-heading">
+                    <h3>统一设置研究等级</h3>
+                    <span class="muted">批量应用</span>
+                  </div>
+                  <p class="field-note">一键将洗翠图鉴中的所有宝可梦设为同一等级。此操作会清除已有的单独设置。</p>
+                  <div class="pokemon-bulk-levels" role="group" aria-label="批量设置所有宝可梦研究等级">
+                    <button class="pokemon-bulk-level" type="button" data-research-bulk="base" aria-pressed="false" disabled>基础等级</button>
+                    <button class="pokemon-bulk-level" type="button" data-research-bulk="level10" aria-pressed="true" disabled>等级 10</button>
+                    <button class="pokemon-bulk-level" type="button" data-research-bulk="perfect" aria-pressed="false" disabled>完美</button>
+                  </div>
+                  <div class="pokemon-bulk-current">当前默认：<strong id="pokemon-default-level-label">研究等级 10</strong></div>
+                  <div class="pokemon-bulk-overrides" id="pokemon-override-count">尚无单独设置</div>
+                </section>
+
+                <section class="settings-block pokemon-research-settings">
+                  <div class="settings-block-heading">
+                    <h3>宝可梦研究等级</h3>
+                    <span id="pokemon-settings-save-status" class="muted" role="status" aria-live="polite">自动保存</span>
+                  </div>
+                  <p class="field-note">按洗翠图鉴顺序排列，同一进化链相邻显示。可搜索中文或英文名称，并为单个宝可梦设置等级。</p>
+                  <label class="pokemon-research-search-label" for="pokemon-research-search">搜索宝可梦</label>
+                  <input id="pokemon-research-search" type="search" placeholder="输入中文或英文名称…" autocomplete="off" disabled>
+                  <div class="pokemon-research-list-heading">
+                    <span id="pokemon-research-count">正在加载图鉴…</span>
+                    <span>基础 · 等级 10 · 完美</span>
+                  </div>
+                  <div id="pokemon-research-list" class="pokemon-research-list" aria-label="逐只宝可梦研究等级设置">
+                    <div class="pokemon-research-empty">正在加载洗翠图鉴…</div>
+                  </div>
+                </section>
+              </div>
+            </section>
+            <section class="panel settings-panel settings-tab-panel" id="settings-tab-resources" role="tabpanel" aria-labelledby="settings-tab-button-resources" data-settings-panel="resources" hidden>
+              <div class="resource-overview">
+                <div class="resource-overview-head">
+                  <div>
+                    <h3>资源管理</h3>
+                    <p>所有资源集中在这里。已就绪的直接打开目录，缺失的按提示下载或导入。</p>
+                  </div>
+                  <span id="resource-overview-summary" class="status-pill status-muted">正在检查</span>
+                </div>
+                <div class="resource-overview-actions">
+                  <button id="unified-download-all" class="btn btn-primary" type="button" disabled>一键下载缺失资源</button>
+                  <button id="unified-refresh" class="btn btn-secondary" type="button">重新检查</button>
+                  <button id="unified-open-cache" class="btn btn-ghost" type="button">打开缓存目录</button>
+                </div>
+                <div id="resource-unified-list" class="resource-unified-list">
+                  <div class="resource-unified-empty">正在检查资源状态…</div>
+                </div>
+                <section id="board-flash-panel" class="board-flash-panel">
+                  <div class="board-flash-head">
+                    <div>
+                      <strong>ESP32-S3 无线板烧录</strong>
+                      <p id="board-flash-copy">检测到板子后，可在这里写入 Pokeldn 无线固件。</p>
+                    </div>
+                    <span id="board-flash-status" class="status-pill status-muted">未检测</span>
+                  </div>
+                  <div class="board-flash-controls">
+                    <select id="board-port" aria-label="选择 ESP32 串口"></select>
+                    <button id="board-detect" class="btn btn-secondary" type="button">检测板子</button>
+                    <button id="board-flash" class="btn btn-primary" type="button" disabled>烧录固件</button>
+                  </div>
+                  <div id="board-flash-prompt" class="board-flash-prompt hidden">
+                    <strong>检测到候选 ESP32 串口，但还没有识别到已烧录固件。</strong>
+                    <span>请确认是 ESP32-S3 板子并插好 USB 数据线。</span>
+                    <button id="board-flash-now" class="btn btn-primary" type="button">立即烧录</button>
+                  </div>
+                  <p id="board-flash-note" class="field-note"></p>
+                  <pre id="board-flash-log" class="board-flash-log hidden"></pre>
+                </section>
+                <p class="field-note">「一键下载缺失资源」只处理可自动下载的项目；prod.keys 需要你自行导入。</p>
+              </div>
+
+              <details class="resource-legacy-details">
+                <summary>高级资源详情与诊断</summary>
+                <div class="resource-legacy-body">
+<div class="settings-block resource-manager-block">
+            <div class="settings-block-heading">
+              <h3>可下载资源</h3>
+              <span id="resource-summary" class="status-pill status-muted">正在检查</span>
+            </div>
+            <p class="field-note">大文件不随工具打包，缺失时从这里一键下载。已下载的资源只显示“打开/检查”，不会再出现下载按钮；只有缺失或需要修复时才显示下载。所有缓存统一放在工具目录的 <code>cache/</code>，复制这个文件夹即可备份或迁移。</p>
+            <div id="resource-cards" class="resource-cards"></div>
+            <div id="resource-progress" class="resource-progress hidden" aria-live="polite">
+              <div class="resource-progress-head"><span id="resource-progress-label">准备下载…</span><strong id="resource-progress-percent">0%</strong></div>
+              <div class="resource-progress-track"><div id="resource-progress-bar" class="resource-progress-bar" style="width:0%"></div></div>
+              <p id="resource-progress-detail" class="field-note">尚未开始</p>
+            </div>
+            <div class="button-row resource-buttons">
+              <button id="refresh-resources" class="btn btn-secondary" type="button">重新检查</button>
+              <button id="open-cache-folder" class="btn btn-ghost" type="button">打开缓存目录</button>
+            </div>
+          </div>
+<div class="settings-block asset-settings-block">
+            <div class="settings-block-heading">
+              <h3>宝可梦图片资源</h3>
+              <span id="pokemon-assets-status" class="status-pill status-muted">正在检查</span>
+            </div>
+            <p id="pokemon-assets-summary" class="field-note">图片资源为可选项。下载后会保存在工具目录的 <code>cache/pokemon-images</code>，之后可以离线显示；不下载不影响 RNG 计算。</p>
+            <div class="asset-progress-wrap hidden" id="pokemon-assets-progress-wrap" aria-live="polite">
+              <div class="asset-progress-copy"><span id="pokemon-assets-progress-label">准备图片资源</span><strong id="pokemon-assets-progress-percent">0%</strong></div>
+              <div class="asset-progress-track"><div id="pokemon-assets-progress-bar" class="asset-progress-bar" style="width:0%"></div></div>
+              <p id="pokemon-assets-progress-detail" class="field-note">尚未开始</p>
+            </div>
+            <div class="button-row asset-buttons">
+              <button id="check-pokemon-assets" class="btn btn-secondary" type="button">检查图片资源</button>
+              <button id="download-pokemon-assets" class="btn btn-primary" type="button">下载／补全图片</button>
+              <button id="open-pokemon-assets" class="btn btn-ghost" type="button">打开图片文件夹</button>
+            </div>
+            <p class="field-note">图片保存在工具目录的 <code>cache/pokemon-images/cache</code>；自定义图片请放入同目录的 <code>custom</code>，自定义图片优先显示。点击「打开图片文件夹」即可定位自定义图片目录。文件名沿用引擎格式，例如 <code>c_712.png</code>、<code>c_712s.png</code>。</p>
+          </div>
+<div class="settings-block engine-block">
+            <div class="settings-block-heading">
+              <h3>本地计算引擎</h3>
+              <span id="local-engine-status" class="status-pill status-muted">正在检查</span>
+            </div>
+            <p id="local-engine-details" class="field-note">检查本地计算代码、遭遇表和候选数据。</p>
+
+            <div id="engine-missing-list" class="engine-missing hidden"></div>
+
+            <div class="button-row engine-actions">
+              <button id="engine-auto-install" class="btn btn-primary" type="button">自动下载并安装</button>
+              <button id="engine-pick-zip" class="btn btn-secondary" type="button">用本地 ZIP 安装</button>
+              <button id="open-engine-folder" class="btn btn-secondary" type="button">打开引擎文件夹</button>
+              <button id="open-upstream-repo" class="btn btn-ghost" type="button">打开上游项目</button>
+            </div>
+
+            <div id="engine-zip-row" class="engine-zip-row hidden">
+              <input id="engine-zip-path" type="text" placeholder="粘贴上游源码 ZIP 的完整路径，或点右侧选择文件">
+              <button id="engine-choose-zip" class="btn btn-secondary" type="button">选择 ZIP…</button>
+              <button id="engine-install-zip" class="btn btn-primary" type="button">用这个 ZIP 安装</button>
+            </div>
+
+            <div id="engine-progress" class="engine-progress hidden" aria-live="polite">
+              <div class="engine-progress-head">
+                <span id="engine-progress-label">正在安装本地引擎…</span>
+                <strong id="engine-progress-time">0 秒</strong>
+              </div>
+              <pre id="engine-progress-log" class="engine-log"></pre>
+            </div>
+
+            <div class="engine-manual">
+              <h4>网络受限时的手动流程</h4>
+              <ol>
+                <li>点「打开上游项目」，在页面右上角选 <code>Code → Download ZIP</code>，下载约 20 MB 的源码包。</li>
+                <li>回到本页点「选择 ZIP…」，选中刚下载的文件，再点「用这个 ZIP 安装」。</li>
+                <li>安装完成后状态会变为「本地引擎已验证」，可以直接计算。</li>
+              </ol>
+              <p class="field-note">程序会把引擎解压到下面这个位置，安装时会自动创建目录：</p>
+              <p class="engine-path"><code id="engine-target-path">…</code></p>
+              <p class="field-note">如果你想完全手动放置，目录结构应为 <code>offline_engine/pla/</code> 与 <code>offline_engine/static/resources/</code>，并包含下列文件：</p>
+              <ul id="engine-required-files" class="engine-required"></ul>
+            </div>
+
+            <div class="button-row">
+              <button id="refresh-engine-status" class="btn btn-secondary" type="button">重新检查</button>
+              <button id="copy-engine-log" class="btn btn-primary" type="button">复制完整诊断报告</button>
+              <button id="copy-installer-log-path" class="btn btn-ghost" type="button">复制安装日志路径</button>
+            </div>
+            <p class="field-note">首次安装会联网下载源码、数据和 Python 依赖；验证通过后，日常路径计算在本机完成，不请求远程计算 API。</p>
+            <div class="diagnostics-instructions">
+              <strong>遇到错误时，请在这里收集日志：</strong>
+              <ol>
+                <li>优先点击「复制完整诊断报告」，把复制的文本发给开发者。</li>
+                <li><code>offline_engine_setup.log</code> 记录依赖安装、下载和引擎测试；源码模式通常位于项目目录。</li>
+                <li><code>runtime_errors.log</code> 记录计算异常和 traceback；桌面发行版日志保存在用户数据目录的 <code>logs</code> 文件夹。</li>
+                <li>点击「复制完整诊断报告」会附带实际日志路径，便于准确定位文件。</li>
+                <li>如果依赖安装失败，确认网络正常后关闭程序，再运行 <code>prepare_offline_engine.bat</code>。</li>
+              </ol>
+            </div>
+          </div>
+                </div>
+              </details>
+            </section>
+
+            <section class="settings-tab-panel settings-help-panel" id="settings-tab-help" role="tabpanel" aria-labelledby="settings-tab-button-help" data-settings-panel="help" hidden>
+              <section class="panel tutorial-panel" aria-labelledby="tutorial-title">
+                <div class="tutorial-heading">
+                  <div class="tutorial-heading-copy">
+                    <h3 id="tutorial-title">使用教程</h3>
+                    <p>从 Seed 到路线结果，按下面的顺序完成设置即可。</p>
+                  </div>
+                  <span class="tutorial-label">快速上手指南</span>
+                </div>
+                <p class="tutorial-intro">本工具根据你提供的 Seed、群体类型、宝可梦和研究条件，在本机计算可能的闪光路线。它不会读取 Switch 存档或实时内存，也不会替你确认交换；「联机测 Seed」只接收你主动进入交换确认页时的那四只记录。建议首次使用时从上到下阅读一次。</p>
+                <div class="tutorial-grid">
+                  <article>
+                    <h3>① 输入 Seed</h3>
+                    <p>在左上角「种子（Seed）」卡片粘贴十进制 Seed，按 Enter 或点「应用」。不再需要 TXT 文件，也不会自动读取文件。<strong>还没有 Seed 时，点上方「联机测 Seed」：插上 ESP32 无线板，与 Switch 本地交换采集四只最初捕获宝可梦，会自动反推并填入。</strong></p>
+                  </article>
+                  <article>
+                    <h3>② 设置群体类型与数量</h3>
+                    <p>在首页选择与游戏现场一致的类型。普通大量出现使用单轮参数；大大量出现可按单轮计算；只有确实出现第二轮奖励群体时，才选择「大大量出现两波」，并填写第二轮数量与宝可梦。数量、轮次或类型不符会导致路线失准。</p>
+                  </article>
+                  <article>
+                    <h3>③ 选择每一轮的宝可梦</h3>
+                    <p>在首页的宝可梦选择框中输入中文名或英文名，再从候选项中选择正确物种／形态。两波模式需要分别选择第一轮和第二轮；单轮模式不需要填写第二轮。若两轮出现同一种宝可梦，会共用「宝可梦设置」中该物种的研究等级。</p>
+                  </article>
+                  <article>
+                    <h3>④ 统一或单独设置研究等级</h3>
+                    <p>进入「设置中心 → 宝可梦设置」。顶部的「基础等级」「等级 10」「完美」会批量设置整份图鉴，并清除已有的单独覆盖；也可以在下方搜索某只宝可梦，单独指定等级。设置会自动保存。研究等级代表该物种的图鉴研究进度，不是群体数量或路线步数。</p>
+                  </article>
+                  <article>
+                    <h3>⑤ 确认闪耀护符并计算</h3>
+                    <p>在同一「宝可梦设置」页面确认是否拥有闪耀护符。回到首页检查 Seed、群体类型、数量和宝可梦后，点击「计算路径」。计算成功后，结果顶部会显示本次使用的宝可梦研究等级与护符状态，便于核对计算条件。</p>
+                  </article>
+                  <article>
+                    <h3>⑥ 阅读路线与筛选结果</h3>
+                    <p>先看每张结果卡片的宝可梦信息和「路径概要」，再按需展开「查看详细」。D1、D2 等代表路线中的操作步骤／清除数量，请按卡片给出的顺序在游戏内执行。「计算筛选条件」会影响引擎计算哪些目标；「结果筛选」只隐藏或显示已算出的结果，不会重新计算。</p>
+                  </article>
+                  <article>
+                    <h3>⑦ 图片资源是可选的</h3>
+                    <p>「资源管理」里的宝可梦图片只用于显示头像，不是 RNG 计算依赖。可以选择下载，也可以暂时不下载；缺少图片不会影响路径计算。图片下载中断后，可以再次打开该页面检查并补全资源。</p>
+                  </article>
+                  <article>
+                    <h3>⑧ 遇到错误时收集诊断</h3>
+                    <p>如果计算失败或提示本地引擎未就绪，进入「资源管理」检查本地计算引擎状态，必要时点击「复制完整诊断报告」，把报告和具体操作步骤一起发给开发者。不要只截取错误提示的最后一行；完整报告通常更容易定位原因。</p>
+                  </article>
+                </div>
+                <p class="tutorial-warning"><strong>计算准确性的关键：</strong> Seed 必须对应当前群体；群体类型、每轮数量、宝可梦形态、研究等级和护符状态也要与游戏内情况一致。计算结果是路线推算，不会实时检测游戏操作是否执行正确。</p>
+              </section>
+
+              <section class="panel about-panel" aria-labelledby="about-panel-title">
+                <div class="about-header">
+                  <span class="about-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+                  <div class="about-title-group">
+                    <h3 id="about-panel-title">关于本程序</h3>
+                    <p>洗翠闪光路线档案 · PLA MMO Path Finder</p>
+                  </div>
+                  <span class="about-version">v{{ app_version }}</span>
+                </div>
+                <div class="about-meta-grid">
+                  <div class="about-meta-item">
+                    <span>作者</span>
+                    <strong>{{ author_name }}</strong>
+                  </div>
+                  <div class="about-meta-item">
+                    <span>计算方式</span>
+                    <strong>本地计算</strong>
+                  </div>
+                  <div class="about-meta-item">
+                    <span>游戏交互</span>
+                    <strong>不读取实时内存 · 不自动操作</strong>
+                  </div>
+                </div>
+                <p class="about-description">本工具用于《宝可梦传说：阿尔宙斯》的闪光路线计算。Seed、研究等级与护符偏好保存在本机用户数据目录；日常路径计算在本地执行。宝可梦图片为可选资源，不下载也能使用计算功能。</p>
+                <div class="about-credit">由 <strong>君粒</strong> 制作与维护</div>
+              </section>
+            </section>
+          </div>
+      </section>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <span>PLA MMO Path Finder v{{ app_version }} · 作者：{{ author_name }}</span>
+      <span>本地仅监听 127.0.0.1 · 不读取 Switch 存档或实时内存</span>
+    </footer>
+  </div>
+
+  <div id="seed-confirm-modal" class="seed-confirm-backdrop hidden" role="presentation" aria-hidden="true">
+    <section class="seed-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="seed-confirm-title" aria-describedby="seed-confirm-description">
+      <div class="seed-confirm-heading">
+        <span class="seed-confirm-icon" aria-hidden="true">↻</span>
+        <div>
+          <p class="seed-confirm-eyebrow">SEED SOURCE</p>
+          <h2 id="seed-confirm-title">确认切换 Seed</h2>
+        </div>
+      </div>
+      <p id="seed-confirm-description" class="seed-confirm-description">检测到新的 Seed，是否应用？</p>
+      <dl class="seed-confirm-values">
+        <div class="seed-confirm-value">
+          <dt>当前 Seed</dt>
+          <dd id="seed-confirm-current">—</dd>
+        </div>
+        <div class="seed-confirm-value">
+          <dt>新 Seed</dt>
+          <dd id="seed-confirm-candidate">—</dd>
+        </div>
+      </dl>
+      <div class="seed-confirm-actions">
+        <button id="seed-confirm-cancel" class="seed-confirm-button seed-confirm-button-secondary" type="button">保留当前 Seed</button>
+        <button id="seed-confirm-accept" class="seed-confirm-button seed-confirm-button-primary" type="button">应用新 Seed</button>
+      </div>
+    </section>
+  </div>
+  <div id="link-seed-modal" class="link-seed-backdrop hidden" role="presentation" aria-hidden="true">
+    <section class="link-seed-dialog link-seed-dashboard" role="dialog" aria-modal="true" aria-labelledby="link-seed-title" tabindex="-1">
+      <header class="link-seed-heading">
+        <div class="link-seed-heading-copy">
+          <p class="link-seed-eyebrow">NINTENDO SWITCH · LOCAL LINK</p>
+          <h2 id="link-seed-title">联机测 Seed</h2>
+          <p class="link-seed-subtitle">插好无线板，在 Switch 完成 2–4 次确认页；推荐 4 只，2–3 只也可尝试反推。</p>
+        </div>
+        <div class="link-seed-heading-actions">
+          <span id="link-seed-env-summary" class="link-seed-env-summary">环境检测中…</span>
+          <button id="link-seed-detail-toggle" class="link-seed-button link-seed-button-ghost link-seed-detail-toggle" type="button">详细页面</button>
+          <button id="link-seed-close" class="settings-close" type="button" aria-label="关闭联机测 Seed">×</button>
+        </div>
+      </header>
+
+      <div class="link-seed-dashboard-body">
+        <aside class="link-seed-control">
+          <div class="link-seed-control-head">
+            <span class="link-seed-kicker">采集控制</span>
+            <span id="link-seed-phase" class="link-seed-phase">待机</span>
+          </div>
+
+          <div id="link-seed-current" class="link-seed-current">
+            <div class="link-seed-current-art">
+              <img id="link-seed-current-image" alt="" hidden>
+              <span id="link-seed-current-fallback" aria-hidden="true">?</span>
+            </div>
+            <div class="link-seed-current-copy">
+              <strong id="link-seed-current-name">等待第一只</strong>
+              <span id="link-seed-current-meta">点「开始采集」后，在 Switch 选择最初捕获的宝可梦</span>
+            </div>
+          </div>
+
+          <div class="link-seed-bar" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="0" id="link-seed-bar">
+            <span id="link-seed-bar-fill"></span>
+          </div>
+          <p id="link-seed-status" class="link-seed-status">尚未开始</p>
+          <p id="link-seed-meta" class="link-seed-meta">插好无线板，在 Switch 进入祝庆村交换 NPC 并选择本地交换。</p>
+
+          <label class="link-seed-field link-seed-code-field" for="link-seed-code">
+            <span>联机密码</span>
+            <input id="link-seed-code" type="text" inputmode="numeric" maxlength="8" autocomplete="off" value="11111111" placeholder="8 位数字">
+          </label>
+
+          <div class="link-seed-primary-actions">
+            <button id="link-seed-start" class="link-seed-button link-seed-button-primary link-seed-start" type="button">开始采集</button>
+            <button id="link-seed-stop" class="link-seed-button link-seed-button-secondary" type="button" disabled>停止</button>
+          </div>
+          <button id="link-seed-solve-current" class="link-seed-button link-seed-button-secondary link-seed-solve-current hidden" type="button">用已收录记录反推 Seed</button>
+          <div id="link-seed-error" class="link-seed-error hidden" role="alert"></div>
+
+          <details id="link-seed-advanced" class="link-seed-advanced">
+            <summary>环境与高级设置</summary>
+            <div class="link-seed-probe" aria-label="联机环境">
+              <div class="link-seed-probe-item" data-link-probe="board">
+                <span class="link-seed-probe-dot" aria-hidden="true"></span>
+                <div><strong>无线板</strong><small id="link-seed-probe-board">尚未检测</small></div>
+              </div>
+              <div class="link-seed-probe-item" data-link-probe="runtime">
+                <span class="link-seed-probe-dot" aria-hidden="true"></span>
+                <div><strong>联机运行时</strong><small id="link-seed-probe-runtime">尚未检测</small></div>
+              </div>
+              <div class="link-seed-probe-item" data-link-probe="keys">
+                <span class="link-seed-probe-dot" aria-hidden="true"></span>
+                <div><strong>prod.keys</strong><small id="link-seed-probe-keys">尚未检测</small></div>
+              </div>
+              <div class="link-seed-probe-item" data-link-probe="solver">
+                <span class="link-seed-probe-dot" aria-hidden="true"></span>
+                <div><strong>EtumrepMMO</strong><small id="link-seed-probe-solver">尚未检测</small></div>
+              </div>
+            </div>
+            <div class="link-seed-form" aria-label="联机参数">
+              <label class="link-seed-field" for="link-seed-channel">
+                <span>无线信道</span>
+                <select id="link-seed-channel">
+                  <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                  <option value="4">4</option><option value="5">5</option><option value="6" selected>6</option>
+                  <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                  <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                  <option value="13">13</option>
+                </select>
+              </label>
+              <label class="link-seed-field" for="link-seed-seconds">
+                <span>最长等待</span>
+                <select id="link-seed-seconds">
+                  <option value="600">10 分钟</option>
+                  <option value="1200">20 分钟</option>
+                  <option value="1800" selected>30 分钟</option>
+                  <option value="2400">40 分钟</option>
+                  <option value="3600">60 分钟</option>
+                </select>
+              </label>
+            </div>
+            <div class="link-seed-advanced-actions">
+              <button id="link-seed-choose-keys" class="link-seed-button link-seed-button-ghost" type="button">选择/导入 prod.keys</button>
+              <button id="link-seed-probe-btn" class="link-seed-button link-seed-button-ghost" type="button">重新检测</button>
+              <button id="link-seed-solve-last" class="link-seed-button link-seed-button-ghost" type="button">用最近记录重算</button>
+              <button id="link-seed-open-resources" class="link-seed-button link-seed-button-ghost" type="button">资源管理</button>
+            </div>
+          </details>
+        </aside>
+
+        <section class="link-seed-main" aria-label="采集到的四只宝可梦">
+          <div class="link-seed-main-head">
+            <div>
+              <h3>本次采集</h3>
+              <p>2–4 只来自同一次群体，且都是最初捕获；只数越多越稳。</p>
+            </div>
+            <span id="link-seed-count-badge" class="link-seed-count-badge">0/4</span>
+          </div>
+          <div id="link-seed-card-grid" class="link-seed-card-grid"></div>
+          <p class="link-seed-inline-hint">进入「确定要进行宝可梦的交换吗？」确认页后按 <kbd>B</kbd> 返回；不要确认交换。</p>
+        </section>
+
+        <aside class="link-seed-side">
+          <section id="link-seed-result-placeholder" class="link-seed-result-placeholder">
+            <p class="link-seed-result-label">最终群体 Seed</p>
+            <strong>等待四只收齐</strong>
+            <small>反推成功后自动填入左侧</small>
+          </section>
+
+          <section id="link-seed-result" class="link-seed-result hidden" aria-live="polite">
+            <div>
+              <p class="link-seed-result-label">最终群体 Seed</p>
+              <p id="link-seed-result-value" class="link-seed-result-value">—</p>
+              <p id="link-seed-result-note" class="link-seed-result-note">已自动填入左侧 Seed；也可以直接点「填入并计算」。</p>
+            </div>
+            <div class="link-seed-result-actions">
+              <button id="link-seed-copy" class="link-seed-button link-seed-button-ghost" type="button">复制</button>
+              <button id="link-seed-calculate" class="link-seed-button link-seed-button-primary" type="button">填入并计算</button>
+            </div>
+          </section>
+
+          <section class="link-seed-log-card">
+            <div class="link-seed-side-head">
+              <h3>运行日志</h3>
+              <span>出错时复制给作者</span>
+            </div>
+            <div class="link-seed-log-actions">
+              <button id="link-seed-log-open" class="link-seed-button link-seed-button-ghost" type="button">查看日志</button>
+              <button id="link-seed-log-copy" class="link-seed-button link-seed-button-ghost" type="button">复制日志</button>
+            </div>
+            <pre id="link-seed-log" class="link-seed-log hidden" aria-live="polite">等待开始…</pre>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </div>
+  <div id="pokemon-assets-prompt" class="asset-prompt-backdrop hidden" role="presentation">
+    <section class="asset-prompt" role="dialog" aria-modal="true" aria-labelledby="pokemon-assets-prompt-title" aria-describedby="pokemon-assets-prompt-description">
+      <div class="asset-prompt-icon" aria-hidden="true">✦</div>
+      <p class="eyebrow">OPTIONAL LOCAL ASSETS</p>
+      <h2 id="pokemon-assets-prompt-title">让路线结果更直观</h2>
+      <p id="pokemon-assets-prompt-description">可以下载宝可梦图片资源，用于展示普通、闪光与洗翠形态。图片保存在本地，下载后可离线使用；不下载也不会影响计算。</p>
+      <div class="asset-prompt-actions">
+        <button id="choose-download-pokemon-assets" class="btn btn-primary" type="button">下载图片资源</button>
+        <button id="choose-skip-pokemon-assets" class="btn btn-ghost" type="button">暂不下载</button>
+      </div>
+      <p class="asset-prompt-footnote">图片来自可选的外部素材源；程序不会把图片打包在安装包内。</p>
+    </section>
+  </div>
+  <div id="resource-prompt" class="resource-prompt-backdrop hidden" role="presentation" aria-hidden="true">
+    <section class="resource-prompt-dialog" role="dialog" aria-modal="true" aria-labelledby="resource-prompt-title">
+      <p class="seed-confirm-eyebrow">RESOURCE SETUP</p>
+      <h2 id="resource-prompt-title">联机功能需要下载组件</h2>
+      <p class="resource-prompt-copy">检测到以下文件还没有下载。可以现在下载，也可以稍后到「设置 → 资源管理」再处理；不下载不影响路径计算。</p>
+      <ul id="resource-prompt-list" class="resource-prompt-list"></ul>
+      <div class="resource-prompt-actions">
+        <button id="resource-prompt-download" class="btn btn-primary" type="button">下载全部</button>
+        <button id="resource-prompt-later" class="btn btn-ghost" type="button">稍后</button>
+      </div>
+      <p class="resource-prompt-footnote">下载来自各项目的 GitHub Release，保存在工具目录的 <code>cache/</code>。</p>
+    </section>
+  </div>
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+
+
+  <div id="result-detail-modal" class="result-detail-backdrop hidden" role="presentation">
+    <section class="result-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="result-detail-title" tabindex="-1">
+      <header class="result-detail-bar">
+        <h2 id="result-detail-title">详细步骤</h2>
+        <button id="result-detail-close" class="settings-close" type="button" aria-label="关闭详细步骤">×</button>
+      </header>
+      <div id="result-detail-body" class="result-detail-body"></div>
+    </section>
+  </div>
+  <script src="{{ url_for('static', filename='result_view.js', v='0.9.5') }}"></script>
+  <script src="{{ url_for('static', filename='app.js', v='0.9.5-multi19') }}"></script>
+</body>
+</html>
+
+

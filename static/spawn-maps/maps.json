@@ -1,0 +1,1423 @@
+{
+  "source": "Serebii.net Pokearth + Lincoln-LM/JS-Finder (GPL-3.0), local personal use",
+  "width": 2048,
+  "height": 2048,
+  "maps": [
+    {
+      "key": "ObsidianFieldlands",
+      "label": "黑曜原野",
+      "slug": "obsidianfieldlands",
+      "image": "ObsidianFieldlands.webp",
+      "width": 2048,
+      "height": 2048,
+      "source": "Serebii.net Pokearth + Lincoln-LM/JS-Finder PlacementSpawner dumps",
+      "points": [
+        {
+          "id": "ObsidianFieldlands-00",
+          "name": "lnd_ex_02",
+          "spawners": [
+            "lnd_ex_02"
+          ],
+          "species": "Rapidash",
+          "x": 0.649023,
+          "y": 0.098828,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Horseshoe Plains",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-01",
+          "name": "oyb_ex_00",
+          "spawners": [
+            "oyb_ex_00"
+          ],
+          "species": "Luxio",
+          "x": 0.198232,
+          "y": 0.233662,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in Floaro Gardens",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-02",
+          "name": "oyb_ex_01",
+          "spawners": [
+            "oyb_ex_01"
+          ],
+          "species": "Bibarel",
+          "x": 0.656582,
+          "y": 0.790801,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Tidewater Dam",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-03",
+          "name": "oyb_ex_02",
+          "spawners": [
+            "oyb_ex_02"
+          ],
+          "species": "Snorlax",
+          "x": 0.341836,
+          "y": 0.476523,
+          "gender_ratio": 31,
+          "times": [
+            "any"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-04",
+          "name": "oyb_ex_03",
+          "spawners": [
+            "oyb_ex_03"
+          ],
+          "species": "Floatzel",
+          "x": 0.681621,
+          "y": 0.284092,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-05",
+          "name": "oyb_ex_04",
+          "spawners": [
+            "oyb_ex_04"
+          ],
+          "species": "Stantler",
+          "x": 0.694629,
+          "y": 0.429883,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "upon Deertrack Heights",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-06",
+          "name": "oyb_ex_05",
+          "spawners": [
+            "oyb_ex_05"
+          ],
+          "species": "Staravia",
+          "x": 0.488662,
+          "y": 0.58585,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "on Windswept Run",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-07",
+          "name": "oyb_ex_06",
+          "spawners": [
+            "oyb_ex_06"
+          ],
+          "species": "Parasect",
+          "x": 0.689033,
+          "y": 0.536475,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in Nature’s Pantry",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-08",
+          "name": "oyb_ex_07",
+          "spawners": [
+            "oyb_ex_07"
+          ],
+          "species": "Lopunny",
+          "x": 0.403018,
+          "y": 0.967246,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-09",
+          "name": "oyb_ex_08",
+          "spawners": [
+            "oyb_ex_08"
+          ],
+          "species": "Scyther",
+          "x": 0.858867,
+          "y": 0.936738,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-10",
+          "name": "oyb_ex_09",
+          "spawners": [
+            "oyb_ex_09"
+          ],
+          "species": "Graveler",
+          "x": 0.952695,
+          "y": 0.316289,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-11",
+          "name": "oyb_ex_10",
+          "spawners": [
+            "oyb_ex_10"
+          ],
+          "species": "Heracross",
+          "x": 0.886523,
+          "y": 0.140371,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in Grueling Grove",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-12",
+          "name": "oyb_ex_11",
+          "spawners": [
+            "oyb_ex_11"
+          ],
+          "species": "Alakazam",
+          "x": 0.117871,
+          "y": 0.7375,
+          "gender_ratio": 63,
+          "times": [
+            "any"
+          ],
+          "area": "in Sandgem Flats",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-13",
+          "name": "oyb_ex_12",
+          "spawners": [
+            "oyb_ex_12"
+          ],
+          "species": "Magikarp",
+          "x": 0.867773,
+          "y": 0.624902,
+          "gender_ratio": 0,
+          "times": [
+            "any"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-14",
+          "name": "oyb_ex_13",
+          "spawners": [
+            "oyb_ex_13"
+          ],
+          "species": "Gyarados",
+          "x": 0.09209,
+          "y": 0.425586,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Lake Verity",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-15",
+          "name": "oyb_ex_14",
+          "spawners": [
+            "oyb_ex_14"
+          ],
+          "species": "Infernape",
+          "x": 0.326406,
+          "y": 0.84084,
+          "gender_ratio": 31,
+          "times": [
+            "any"
+          ],
+          "area": "on Ramanas Island",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-16",
+          "name": "oyb_ex_15",
+          "spawners": [
+            "oyb_ex_15"
+          ],
+          "species": "Kricketune",
+          "x": 0.55085,
+          "y": 0.749238,
+          "gender_ratio": 127,
+          "times": [
+            "day",
+            "night"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-17",
+          "name": "oyb_ex_16",
+          "spawners": [
+            "oyb_ex_16"
+          ],
+          "species": "Blissey",
+          "x": 0.952734,
+          "y": 0.426152,
+          "gender_ratio": 254,
+          "times": [
+            "any"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        },
+        {
+          "id": "ObsidianFieldlands-18",
+          "name": "oyb_ex_17",
+          "spawners": [
+            "oyb_ex_17"
+          ],
+          "species": "Golbat",
+          "x": 0.939199,
+          "y": 0.648271,
+          "gender_ratio": 127,
+          "times": [
+            "night"
+          ],
+          "area": "in the Obsidian Fieldlands",
+          "alpha": true
+        }
+      ]
+    },
+    {
+      "key": "CrimsonMirelands",
+      "label": "红莲湿地",
+      "slug": "crimsonmirelands",
+      "image": "CrimsonMirelands.webp",
+      "width": 2048,
+      "height": 2048,
+      "source": "Serebii.net Pokearth + Lincoln-LM/JS-Finder PlacementSpawner dumps",
+      "points": [
+        {
+          "id": "CrimsonMirelands-00",
+          "name": "oyb_ex_00",
+          "spawners": [
+            "oyb_ex_00"
+          ],
+          "species": "Tangrowth",
+          "x": 0.374697,
+          "y": 0.561768,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Gapejaw Bog",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-01",
+          "name": "oyb_ex_01",
+          "spawners": [
+            "oyb_ex_01"
+          ],
+          "species": "Hippowdon",
+          "x": 0.507383,
+          "y": 0.767217,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Gapejaw Bog",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-02",
+          "name": "oyb_ex_02",
+          "spawners": [
+            "oyb_ex_02"
+          ],
+          "species": "Skuntank",
+          "x": 0.524131,
+          "y": 0.58835,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at the Scarlet Bog",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-03",
+          "name": "oyb_ex_03",
+          "spawners": [
+            "oyb_ex_03"
+          ],
+          "species": "Onix",
+          "x": 0.543652,
+          "y": 0.415039,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Crimson Mirelands",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-04",
+          "name": "oyb_ex_06",
+          "spawners": [
+            "oyb_ex_06"
+          ],
+          "species": "Roserade",
+          "x": 0.320703,
+          "y": 0.206533,
+          "gender_ratio": 127,
+          "times": [
+            "day"
+          ],
+          "area": "on Cloudpool Ridge",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-05",
+          "name": "oyb_ex_05",
+          "spawners": [
+            "oyb_ex_05"
+          ],
+          "species": "Lickilicky",
+          "x": 0.509766,
+          "y": 0.13333,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at the Shrouded Ruins",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-07",
+          "name": "oyb_ex_07",
+          "spawners": [
+            "oyb_ex_07"
+          ],
+          "species": "Yanmega",
+          "x": 0.828398,
+          "y": 0.711182,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Droning Meadow",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-08",
+          "name": "oyb_ex_08",
+          "spawners": [
+            "oyb_ex_08"
+          ],
+          "species": "Whiscash",
+          "x": 0.730469,
+          "y": 0.346484,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Lake Valor",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-09",
+          "name": "oyb_ex_09",
+          "spawners": [
+            "oyb_ex_09"
+          ],
+          "species": "Carnivine",
+          "x": 0.775635,
+          "y": 0.450088,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Crimson Mirelands",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-10",
+          "name": "oyb_ex_10",
+          "spawners": [
+            "oyb_ex_10"
+          ],
+          "species": "Sliggoo-1",
+          "x": 0.572949,
+          "y": 0.903613,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at the Holm of Trials",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-11",
+          "name": "oyb_ex_11",
+          "spawners": [
+            "oyb_ex_11"
+          ],
+          "species": "Rhyhorn",
+          "x": 0.529687,
+          "y": 0.262207,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "on the Diamond Heath",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-12",
+          "name": "oyb_ex_12",
+          "spawners": [
+            "oyb_ex_12"
+          ],
+          "species": "Ursaring",
+          "x": 0.72168,
+          "y": 0.901367,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Ursa’s Ring",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-13",
+          "name": "oyb_ex_13",
+          "spawners": [
+            "oyb_ex_13"
+          ],
+          "species": "Toxicroak",
+          "x": 0.353711,
+          "y": 0.808789,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at the Holm of Trials",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-14",
+          "name": "oyb_ex_14",
+          "spawners": [
+            "oyb_ex_14"
+          ],
+          "species": "Pachirisu",
+          "x": 0.205381,
+          "y": 0.755244,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Crimson Mirelands",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-15",
+          "name": "oyb_ex_15",
+          "spawners": [
+            "oyb_ex_15"
+          ],
+          "species": "Raichu",
+          "x": 0.217383,
+          "y": 0.338281,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Crimson Mirelands",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-16",
+          "name": "oyb_ex_16",
+          "spawners": [
+            "oyb_ex_16"
+          ],
+          "species": "Vespiquen",
+          "x": 0.804297,
+          "y": 0.504785,
+          "gender_ratio": 254,
+          "times": [
+            "any"
+          ],
+          "area": "in the Crimson Mirelands",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-17",
+          "name": "oyb_ex_17",
+          "spawners": [
+            "oyb_ex_17"
+          ],
+          "species": "Torterra",
+          "x": 0.420117,
+          "y": 0.856348,
+          "gender_ratio": 31,
+          "times": [
+            "any"
+          ],
+          "area": "at the Holm of Trials",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-18",
+          "name": "oyb_ex_18",
+          "spawners": [
+            "oyb_ex_18"
+          ],
+          "species": "Ursaring",
+          "x": 0.184082,
+          "y": 0.669893,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Crimson Mirelands",
+          "alpha": true
+        },
+        {
+          "id": "CrimsonMirelands-19",
+          "name": "oyb_ex_04",
+          "spawners": [
+            "oyb_ex_04"
+          ],
+          "species": "Honchkrow",
+          "x": 0.320703,
+          "y": 0.206533,
+          "gender_ratio": 127,
+          "times": [
+            "night"
+          ],
+          "area": "on Cloudpool Ridge",
+          "alpha": true
+        }
+      ]
+    },
+    {
+      "key": "CobaltCoastlands",
+      "label": "群青海岸",
+      "slug": "cobaltcoastlands",
+      "image": "CobaltCoastlands.webp",
+      "width": 2048,
+      "height": 2048,
+      "source": "Serebii.net Pokearth + Lincoln-LM/JS-Finder PlacementSpawner dumps",
+      "points": [
+        {
+          "id": "CobaltCoastlands-00",
+          "name": "oyb_ex_00",
+          "spawners": [
+            "oyb_ex_00"
+          ],
+          "species": "Ambipom",
+          "x": 0.400078,
+          "y": 0.900635,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Cobalt Coastlands",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-01",
+          "name": "oyb_ex_01",
+          "spawners": [
+            "oyb_ex_01"
+          ],
+          "species": "Dusknoir",
+          "x": 0.721953,
+          "y": 0.8229,
+          "gender_ratio": 127,
+          "times": [
+            "night"
+          ],
+          "area": "at Deadwood Haunt",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-02",
+          "name": "oyb_ex_02",
+          "spawners": [
+            "oyb_ex_02"
+          ],
+          "species": "Empoleon",
+          "x": 0.323799,
+          "y": 0.207773,
+          "gender_ratio": 31,
+          "times": [
+            "any"
+          ],
+          "area": "in the Cobalt Coastlands",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-03",
+          "name": "oyb_ex_03",
+          "spawners": [
+            "oyb_ex_03"
+          ],
+          "species": "Walrein",
+          "x": 0.239492,
+          "y": 0.688721,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Ginkgo Landing",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-04",
+          "name": "oyb_ex_05",
+          "spawners": [
+            "oyb_ex_05"
+          ],
+          "species": "Tentacruel",
+          "x": 0.898828,
+          "y": 0.35791,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Cobalt Coastlands",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-05",
+          "name": "oyb_ex_06",
+          "spawners": [
+            "oyb_ex_06"
+          ],
+          "species": "Lumineon",
+          "x": 0.626465,
+          "y": 0.306348,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Seagrass Haven",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-06",
+          "name": "oyb_ex_07",
+          "spawners": [
+            "oyb_ex_07"
+          ],
+          "species": "Machoke",
+          "x": 0.289785,
+          "y": 0.48124,
+          "gender_ratio": 63,
+          "times": [
+            "any"
+          ],
+          "area": "at Ginkgo Landing",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-07",
+          "name": "oyb_ex_08",
+          "spawners": [
+            "oyb_ex_08"
+          ],
+          "species": "Drapion",
+          "x": 0.198145,
+          "y": 0.540039,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Cobalt Coastlands",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-08",
+          "name": "oyb_ex_09",
+          "spawners": [
+            "oyb_ex_09"
+          ],
+          "species": "Octillery",
+          "x": 0.486084,
+          "y": 0.434033,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "on Castaway Shore",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-09",
+          "name": "oyb_ex_10",
+          "spawners": [
+            "oyb_ex_10"
+          ],
+          "species": "Chansey",
+          "x": 0.903037,
+          "y": 0.883877,
+          "gender_ratio": 254,
+          "times": [
+            "any"
+          ],
+          "area": "along Tombolo Walk",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-10",
+          "name": "oyb_ex_11",
+          "spawners": [
+            "oyb_ex_11"
+          ],
+          "species": "Mantine",
+          "x": 0.595898,
+          "y": 0.563867,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in Tranquility Cove",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-11",
+          "name": "oyb_ex_12",
+          "spawners": [
+            "oyb_ex_12"
+          ],
+          "species": "Purugly",
+          "x": 0.617217,
+          "y": 0.381201,
+          "gender_ratio": 191,
+          "times": [
+            "any"
+          ],
+          "area": "at Veilstone Cape",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-12",
+          "name": "oyb_ex_13",
+          "spawners": [
+            "oyb_ex_13"
+          ],
+          "species": "Ninetales",
+          "x": 0.799346,
+          "y": 0.161338,
+          "gender_ratio": 191,
+          "times": [
+            "any"
+          ],
+          "area": "on Firespit Island",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-13",
+          "name": "oyb_ex_14",
+          "spawners": [
+            "oyb_ex_14"
+          ],
+          "species": "Gastrodon-1",
+          "x": 0.586621,
+          "y": 0.188086,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Seagrass Haven",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-14",
+          "name": "oyb_ex_15",
+          "spawners": [
+            "oyb_ex_15"
+          ],
+          "species": "Qwilfish-1",
+          "x": 0.492383,
+          "y": 0.142578,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Cobalt Coastlands",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-15",
+          "name": "oyb_ex_16",
+          "spawners": [
+            "oyb_ex_16"
+          ],
+          "species": "Mothim",
+          "x": 0.142314,
+          "y": 0.314893,
+          "gender_ratio": 0,
+          "times": [
+            "any"
+          ],
+          "area": "on Spring Path",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-16",
+          "name": "oyb_ex_17",
+          "spawners": [
+            "oyb_ex_17"
+          ],
+          "species": "Gyarados",
+          "x": 0.908496,
+          "y": 0.534668,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Cobalt Coastlands",
+          "alpha": true
+        },
+        {
+          "id": "CobaltCoastlands-17",
+          "name": "oyb_ex_18",
+          "spawners": [
+            "oyb_ex_18"
+          ],
+          "species": "Golduck",
+          "x": 0.536162,
+          "y": 0.864531,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Bathers’ Lagoon",
+          "alpha": true
+        }
+      ]
+    },
+    {
+      "key": "CoronetHighlands",
+      "label": "天冠山麓",
+      "slug": "coronethighlands",
+      "image": "CoronetHighlands.webp",
+      "width": 2048,
+      "height": 2048,
+      "source": "Serebii.net Pokearth + Lincoln-LM/JS-Finder PlacementSpawner dumps",
+      "points": [
+        {
+          "id": "CoronetHighlands-00",
+          "name": "oyb_ex_00",
+          "spawners": [
+            "oyb_ex_00"
+          ],
+          "species": "Bronzong",
+          "x": 0.821973,
+          "y": 0.523467,
+          "gender_ratio": 255,
+          "times": [
+            "any"
+          ],
+          "area": "in the Coronet Highlands",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-01",
+          "name": "oyb_ex_01",
+          "spawners": [
+            "oyb_ex_01"
+          ],
+          "species": "Clefable",
+          "x": 0.255342,
+          "y": 0.917314,
+          "gender_ratio": 191,
+          "times": [
+            "night"
+          ],
+          "area": "at the Fabled Spring",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-02",
+          "name": "oyb_ex_02",
+          "spawners": [
+            "oyb_ex_02"
+          ],
+          "species": "Rhyperior",
+          "x": 0.314746,
+          "y": 0.589453,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Coronet Highlands",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-03",
+          "name": "oyb_ex_03",
+          "spawners": [
+            "oyb_ex_03"
+          ],
+          "species": "Golem",
+          "x": 0.147158,
+          "y": 0.703115,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in Bolderoll Ravine",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-04",
+          "name": "oyb_ex_04",
+          "spawners": [
+            "oyb_ex_04"
+          ],
+          "species": "Mismagius",
+          "x": 0.198291,
+          "y": 0.57748,
+          "gender_ratio": 127,
+          "times": [
+            "night"
+          ],
+          "area": "at Stonetooth Rows",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-05",
+          "name": "oyb_ex_05",
+          "spawners": [
+            "oyb_ex_05"
+          ],
+          "species": "Probopass",
+          "x": 0.436719,
+          "y": 0.607217,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Coronet Highlands",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-06",
+          "name": "oyb_ex_06",
+          "spawners": [
+            "oyb_ex_06"
+          ],
+          "species": "Electivire",
+          "x": 0.311748,
+          "y": 0.359199,
+          "gender_ratio": 63,
+          "times": [
+            "any"
+          ],
+          "area": "along Cloudcap Pass",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-07",
+          "name": "oyb_ex_07",
+          "spawners": [
+            "oyb_ex_07"
+          ],
+          "species": "Gabite",
+          "x": 0.562109,
+          "y": 0.511943,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Coronet Highlands",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-08",
+          "name": "oyb_ex_09",
+          "spawners": [
+            "oyb_ex_09"
+          ],
+          "species": "Carnivine",
+          "x": 0.853955,
+          "y": 0.589463,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-09",
+          "name": "oyb_ex_11",
+          "spawners": [
+            "oyb_ex_11"
+          ],
+          "species": "Luxray",
+          "x": 0.356514,
+          "y": 0.480059,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at the Sacred Plaza",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-10",
+          "name": "oyb_ex_12",
+          "spawners": [
+            "oyb_ex_12"
+          ],
+          "species": "Goodra-1",
+          "x": 0.521475,
+          "y": 0.834072,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Coronet Highlands",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-11",
+          "name": "oyb_ex_13",
+          "spawners": [
+            "oyb_ex_13"
+          ],
+          "species": "Steelix",
+          "x": 0.598398,
+          "y": 0.648232,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "on Celestica Trail",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-12",
+          "name": "oyb_ex_14",
+          "spawners": [
+            "oyb_ex_14"
+          ],
+          "species": "Gliscor",
+          "x": 0.568906,
+          "y": 0.557139,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Coronet Highlands",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-13",
+          "name": "oyb_ex_16",
+          "spawners": [
+            "oyb_ex_16"
+          ],
+          "species": "Mothim",
+          "x": 0.609199,
+          "y": 0.901035,
+          "gender_ratio": 0,
+          "times": [
+            "any"
+          ],
+          "area": "in the Wayward Wood",
+          "alpha": true
+        },
+        {
+          "id": "CoronetHighlands-14",
+          "name": "oyb_ex_17",
+          "spawners": [
+            "oyb_ex_17"
+          ],
+          "species": "Gligar",
+          "x": 0.579941,
+          "y": 0.441875,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Coronet Highlands",
+          "alpha": true
+        }
+      ]
+    },
+    {
+      "key": "AlabasterIcelands",
+      "label": "纯白冻土",
+      "slug": "alabastericelands",
+      "image": "AlabasterIcelands.webp",
+      "width": 2048,
+      "height": 2048,
+      "source": "Serebii.net Pokearth + Lincoln-LM/JS-Finder PlacementSpawner dumps",
+      "points": [
+        {
+          "id": "AlabasterIcelands-00",
+          "name": "oyb_ex_00",
+          "spawners": [
+            "oyb_ex_00"
+          ],
+          "species": "Glalie",
+          "x": 0.565332,
+          "y": 0.625391,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Bonechill Wastes",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-01",
+          "name": "oyb_ex_01",
+          "spawners": [
+            "oyb_ex_01"
+          ],
+          "species": "Froslass",
+          "x": 0.229805,
+          "y": 0.863486,
+          "gender_ratio": 254,
+          "times": [
+            "any"
+          ],
+          "area": "in the Ice Column Chamber",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-02",
+          "name": "oyb_ex_02",
+          "spawners": [
+            "oyb_ex_02"
+          ],
+          "species": "Abomasnow",
+          "x": 0.655498,
+          "y": 0.545811,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Bonechill Wastes",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-03",
+          "name": "oyb_ex_03",
+          "spawners": [
+            "oyb_ex_03"
+          ],
+          "species": "Mamoswine",
+          "x": 0.601953,
+          "y": 0.438965,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Avalugg’s Legacy",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-04",
+          "name": "oyb_ex_04",
+          "spawners": [
+            "oyb_ex_04"
+          ],
+          "species": "Gallade",
+          "x": 0.682129,
+          "y": 0.061035,
+          "gender_ratio": 0,
+          "times": [
+            "any"
+          ],
+          "area": "",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-05",
+          "name": "oyb_ex_05",
+          "spawners": [
+            "oyb_ex_05"
+          ],
+          "species": "Gardevoir",
+          "x": 0.830029,
+          "y": 0.403525,
+          "gender_ratio": 127,
+          "times": [
+            "day"
+          ],
+          "area": "at Heart’s Crag",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-06",
+          "name": "oyb_ex_06",
+          "spawners": [
+            "oyb_ex_06"
+          ],
+          "species": "Lucario",
+          "x": 0.294014,
+          "y": 0.889219,
+          "gender_ratio": 31,
+          "times": [
+            "any"
+          ],
+          "area": "at the Icebound Falls",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-07",
+          "name": "oyb_ex_07",
+          "spawners": [
+            "oyb_ex_07"
+          ],
+          "species": "Machamp",
+          "x": 0.305947,
+          "y": 0.4954,
+          "gender_ratio": 63,
+          "times": [
+            "any"
+          ],
+          "area": "along the Arena’s Approach",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-08",
+          "name": "oyb_ex_08",
+          "spawners": [
+            "oyb_ex_08"
+          ],
+          "species": "Garchomp",
+          "x": 0.136084,
+          "y": 0.907842,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at the Avalanche Slopes",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-09",
+          "name": "oyb_ex_09",
+          "spawners": [
+            "oyb_ex_09"
+          ],
+          "species": "Sneasel-1",
+          "x": 0.478057,
+          "y": 0.42252,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Alabaster Icelands",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-10",
+          "name": "oyb_ex_10",
+          "spawners": [
+            "oyb_ex_10"
+          ],
+          "species": "Chimecho",
+          "x": 0.411777,
+          "y": 0.212549,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "at Lake Acuity",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-11",
+          "name": "oyb_ex_11",
+          "spawners": [
+            "oyb_ex_11"
+          ],
+          "species": "Piloswine",
+          "x": 0.355479,
+          "y": 0.624229,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "along the Arena’s Approach",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-12",
+          "name": "oyb_ex_12",
+          "spawners": [
+            "oyb_ex_12"
+          ],
+          "species": "Swinub",
+          "x": 0.469531,
+          "y": 0.576953,
+          "gender_ratio": 127,
+          "times": [
+            "any"
+          ],
+          "area": "in the Alabaster Icelands",
+          "alpha": true
+        },
+        {
+          "id": "AlabasterIcelands-13",
+          "name": "oyb_ex_13",
+          "spawners": [
+            "oyb_ex_13"
+          ],
+          "species": "Electabuzz",
+          "x": 0.317383,
+          "y": 0.771406,
+          "gender_ratio": 63,
+          "times": [
+            "any"
+          ],
+          "area": "at the Icebound Falls",
+          "alpha": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+# PLA MMO Seed & Path
+
+《宝可梦传说 阿尔宙斯》MMO **Seed 获取 + 闪光路径计算**工具。
+
+> 本仓库是新的独立项目，不是旧仓库 `PLA-MMO-Path-Finder` 的备份。  
+> 旧仓库仅保留测 Seed 相关功能；本项目同时支持联机采集 Seed、地图点位和闪光路径计算。
+
+- 作者：**君粒**
+- 当前版本：**v0.9.5**
+- 许可证：**GPL v3.0**
+- 平台：Windows 10 / 11
+- 状态：公开仓库
+
+## 功能
+
+- 联机采集 2–4 只最初捕获宝可梦，并反推 MMO 群体 Seed
+- 本地 RNG 路径计算，不上传 Seed 或存档
+- 五地区地图与多只生成点位置
+- 支持 2 只 / 3 只同时生成
+- 支持多只生成点路径，路径深度 5 / 9 / 12 / 16
+- 闪光、头目、方块闪组合筛选
+- 结果卡显示性格、性别、闪光判定、个体值和路径概要
+- ESP32-S3 无线板检测与固件烧录
+- 多主题、浅色 / 深色模式
+
+## 界面
+
+![主界面](docs/screenshots/layoutA-final.png)
+
+![地区与点位](docs/screenshots/app-regions-final2.png)
+
+![结果卡](docs/screenshots/rich-alpha.png)
+
+## 运行源码
+
+要求：
+
+- Windows 10 / 11
+- Python 3.10+
+- Microsoft Edge WebView2 Runtime
+
+```powershell
+python -m pip install -r requirements.txt
+python app.py
+```
+
+也可以双击项目根目录的 `启动.vbs`。
+
+## 联机运行时
+
+联机采集需要 Pokeldn 精简源码运行时，不随源码仓库分发。
+
+当前资源地址：
+
+```text
+https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/pokeldn-slim-v0.66.12.zip
+```
+
+下载后在程序「设置 → 资源管理」中自动安装，或手动解压到：
+
+```text
+cache/pokeldn-slim/
+```
+
+`prod.keys` 必须由用户从自己的 Switch 导入，仓库和发行包都不包含。
+
+## 使用到的开源项目
+
+| 项目 | 用途 | 许可证 |
+|---|---|---|
+| [Decryptu/pokeldn](https://github.com/Decryptu/pokeldn) | 联机运行时 / LDN | AGPL-3.0 |
+| [kwsch/EtumrepMMO](https://github.com/kwsch/EtumrepMMO) | 四只 PA8 反推群体 Seed | 上游许可证 |
+| [Lincoln-LM/JS-Finder](https://github.com/Lincoln-LM/JS-Finder) | 地图点位数据参考 | GPL-3.0 |
+| [Serebii Pokéarth](https://www.serebii.net/pokearth/hisui/) | 地图底图参考 | 版权归 Serebii |
+
+详细第三方说明见 `LICENSES.md`。
+
+## 公开与分发说明
+
+- 本仓库为公开项目；
+- 不包含 `prod.keys`、用户存档、日志或个人数据；
+- 不包含 PokeIdn 完整发行包；
+- 宝可梦名称、图像和相关商标归各自权利人所有；
+- 本项目为非官方工具，与 Nintendo / The Pokémon Company / GAME FREAK / Creatures Inc. 无隶属或认可关系。
+
+## 致谢
+
+- Pokeldn 上游作者
+- EtumrepMMO 上游作者
+- 地图与点位数据来源
+- 所有参与测试和反馈的用户

@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Build outputs
+build/
+dist/
+release/
+*.spec
+
+# Runtime data and downloads
+cache/
+data/
+logs/
+*.log
+settings.json
+settings.backup.json
+prod.keys
+latest_seed.txt
+
+# Development-only files
+multi-annotate/
+tests/
+tools/__pycache__/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
