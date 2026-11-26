@@ -381,6 +381,7 @@ class SeedLinkService:
         self.slim_dir = self.project_root / "cache" / "pokeldn-slim"
         self.slim_marker = self.slim_dir / "pokeldn" / "__init__.py"
         self.slim_python = self._slim_python()
+        self.seed_helper = self.project_root / "helpers" / "seed-helper" / "seed-helper.exe"
         self.collector = self.project_root / "vendor" / "pla_mmo_seed" / "pla_mmo_seed.py"
         self.probe_script = self.project_root / "vendor" / "pla_mmo_seed" / "probe_board.py"
         self.cache_root = self.project_root / "cache"
@@ -438,7 +439,10 @@ class SeedLinkService:
     def _runtime_command(self, script: Path, args: list[str] | None = None) -> list[str]:
         extra = list(args or [])
         if self._slim_available():
-            return [str(self.slim_python), str(script), *extra]
+            if self.seed_helper.is_file() and getattr(sys, "frozen", False):
+                return [str(self.seed_helper), str(script), *extra]
+            if not getattr(sys, "frozen", False):
+                return [str(self.slim_python), str(script), *extra]
         return [str(self.runtime_exe), "--run", str(script), *extra]
 
     def _migrate_legacy_assets(self) -> None:
@@ -624,6 +628,7 @@ class SeedLinkService:
         if self._slim_available():
             existing = str(env.get("PYTHONPATH") or "").strip()
             env["PYTHONPATH"] = str(self.slim_dir) + (os.pathsep + existing if existing else "")
+            env["POKELDN_RUNTIME_DIR"] = str(self.slim_dir)
         env["POKELDN_RADIO"] = f"esp32:{port}" if port else "esp32:auto"
         return env
 

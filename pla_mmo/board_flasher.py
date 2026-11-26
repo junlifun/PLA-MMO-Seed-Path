@@ -32,6 +32,7 @@ class BoardFlasher:
     def __init__(self, project_root: Path | None = None, seed_link=None):
         self.root = Path(project_root or get_project_root())
         self.firmware = self.root / "cache" / "firmware" / "pokeldn-radio-s3.bin"
+        self.helper = self.root / "helpers" / "esptool-helper" / "esptool-helper.exe"
         self.seed_link = seed_link
         self._lock = threading.RLock()
         self._state = {
@@ -77,7 +78,7 @@ class BoardFlasher:
         candidates = [port for port in ports if port["suitable"]]
         selected = next((port for port in candidates if port["flashed"]), candidates[0] if candidates else None)
         needs_flash = bool(candidates and not flashed_port)
-        esptool_ready = importlib.util.find_spec("esptool") is not None
+        esptool_ready = importlib.util.find_spec("esptool") is not None or self.helper.is_file()
         firmware_ready = self.firmware.is_file() and self.firmware.stat().st_size > 0
         if serial_error:
             message = serial_error
@@ -117,7 +118,7 @@ class BoardFlasher:
             raise BoardFlashError("请选择串口。")
         if not self.firmware.is_file() or self.firmware.stat().st_size == 0:
             raise BoardFlashError("烧录固件尚未下载，请先在资源管理下载 ESP32-S3 固件。")
-        if importlib.util.find_spec("esptool") is None:
+        if importlib.util.find_spec("esptool") is None and not self.helper.is_file():
             raise BoardFlashError("缺少 esptool。请先安装烧录依赖：python -m pip install esptool pyserial")
         ports, error = self._serial_ports()
         if error:
@@ -159,12 +160,15 @@ class BoardFlasher:
             import esptool
             major = int(str(getattr(esptool, "__version__", "4")).split(".", 1)[0])
         except Exception:
-            major = 4
+            # The bundled helper is built with esptool 5; without the module in
+            # the main process use the v5 command spelling.
+            major = 5 if self.helper.is_file() else 4
         write_command = "write-flash" if major >= 5 else "write_flash"
         before = "default-reset" if major >= 5 else "default_reset"
         after = "hard-reset" if major >= 5 else "hard_reset"
+        prefix = [str(self.helper)] if self.helper.is_file() else [sys.executable, "-m", "esptool"]
         command = [
-            sys.executable, "-m", "esptool",
+            *prefix,
             "--chip", "esp32s3",
             "--port", port,
             "--baud", "921600",

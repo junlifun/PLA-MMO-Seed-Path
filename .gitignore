@@ -10,10 +10,13 @@ __pycache__/
 venv/
 
 # Build outputs
-build/
+build/.work/
+build/.work-*/
+build/.helper-dist/
+build/portable-test/
 dist/
 release/
-*.spec
+*.log
 
 # Runtime data and downloads
 cache/

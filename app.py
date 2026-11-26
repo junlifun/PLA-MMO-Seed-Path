@@ -796,6 +796,9 @@ def _run_desktop_window(app: Flask, url: str, port: int, development: bool = Fal
     webview_data_dir = get_data_dir() / "webview2-profile"
     webview_data_dir.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("WEBVIEW2_USER_DATA_FOLDER", str(webview_data_dir))
+    # PyInstaller can make pythonnet choose .NET Framework first; the WebView2
+    # backend needs the CoreCLR runtime in the frozen build.
+    os.environ.setdefault("PYTHONNET_RUNTIME", "coreclr")
 
     try:
         import webview
@@ -906,10 +909,10 @@ def _desktop_mode_enabled() -> bool:
     like the normal launcher instead of silently opening a browser. Set
     ``PLA_BROWSER=1`` (or ``PLA_DEV=1``) for browser-based development.
     """
-    if getattr(sys, "frozen", False):
-        return True
     if os.environ.get("PLA_BROWSER") == "1" or os.environ.get("PLA_DEV") == "1":
         return False
+    if getattr(sys, "frozen", False):
+        return True
     return os.name == "nt"
 
 
@@ -997,10 +1000,25 @@ if __name__ == "__main__":
         try:
             _run_desktop_window(app, url, port, development=development)
         except Exception as exc:
-            print(f"[ERROR] {exc}")
-            print("请查看 startup.log 和 runtime_errors.log 获取诊断信息。")
-            _show_fatal_error(str(exc))
-            raise SystemExit(3) from exc
+            # A packaged build may not have a working pythonnet/WebView2
+            # combination.  Keep the app usable by opening the same local UI
+            # in the default browser instead of showing a fatal error.
+            print(f"[WARN] 独立窗口启动失败，改用浏览器：{exc}")
+            _append_runtime_error("独立窗口启动失败，回退浏览器", exc, {"url": url})
+            try:
+                if not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+                    threading.Timer(1.0, lambda: webbrowser.open(url)).start()
+                app.run(
+                    host="127.0.0.1",
+                    port=port,
+                    debug=development,
+                    use_reloader=False,
+                    threaded=True,
+                )
+            except Exception as fallback_exc:
+                print(f"[ERROR] {fallback_exc}")
+                _show_fatal_error(str(fallback_exc))
+                raise SystemExit(3) from fallback_exc
     else:
         if not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
             threading.Timer(1.0, lambda: webbrowser.open(url)).start()

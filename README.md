@@ -46,6 +46,43 @@ python app.py
 
 也可以双击项目根目录的 `启动.vbs`。
 
+## 一键编译
+
+需要：
+
+- Python 3.10+
+- Inno Setup 6（仅生成安装包时需要）
+
+双击：
+
+```text
+一键编译.bat
+```
+
+输出在 `release`：
+
+```text
+PLA-MMO-Seed-Path-0.9.5-Setup.exe
+PLA-MMO-Seed-Path-0.9.5-portable.zip
+SHA256SUMS.txt
+```
+
+如果只想要便携版：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File build\build_release.ps1 -PortableOnly
+```
+
+编译脚本会：
+
+- 编译主程序；
+- 编译 `seed-helper` 和 `esptool-helper`；
+- 生成便携 ZIP；
+- 生成按用户安装的 Setup；
+- 生成 SHA256 校验文件。
+
+编译产物不包含 `cache`、`prod.keys`、用户设置或日志。
+
 ## 联机运行时
 
 联机采集需要 Pokeldn 精简源码运行时，不随源码仓库分发。
