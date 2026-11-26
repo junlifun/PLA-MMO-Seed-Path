@@ -306,6 +306,8 @@ class UpdateService:
             "published_at": "",
             "release_url": RELEASE_PAGE,
             "asset": None,
+            "patch": None,
+            "patch_note": "",
             "checked_at": "",
             "from_cache": False,
             "error": "",
@@ -322,6 +324,11 @@ class UpdateService:
         item["current_version"] = self.version
         latest = str(item.get("latest_version") or "")
         item["update_available"] = bool(is_newer(latest, self.version) and not item.get("skipped"))
+        patch = item.get("patch")
+        if not isinstance(patch, dict) or str(patch.get("base_version") or "") != self.version:
+            item["patch"] = None
+        if not item["update_available"]:
+            item["patch"] = None
         return item
 
     def snapshot(self) -> dict:
@@ -386,6 +393,57 @@ class UpdateService:
             return None
         return asset
 
+    def _patch_candidate(self, manifest: dict) -> dict | None:
+        """Return the adjacent-version patch when it applies to this folder."""
+        patch = manifest.get("patch")
+        if not isinstance(patch, dict):
+            return None
+        if str(patch.get("base_version") or "") != self.version:
+            return None
+        if str(patch.get("version") or "") != str(manifest.get("version") or ""):
+            return None
+        files = patch.get("files")
+        if not isinstance(files, list) or not files or len(files) > 20000:
+            return None
+        for item in files:
+            if not isinstance(item, dict):
+                return None
+            path = str(item.get("path") or "")
+            action = str(item.get("action") or "")
+            if not path or not _safe_member(path) or action not in {"add", "replace", "delete"}:
+                return None
+            parts = PurePosixPath(path.replace("\\", "/")).parts
+            if parts and (parts[0].lower().startswith("unins") or parts[0].lower() == "cache"):
+                return None
+        if not str(patch.get("url") or "") or not str(patch.get("sha256") or ""):
+            return None
+        return patch
+
+    def _patch_preflight(self, patch: dict) -> tuple[bool, str]:
+        """Verify that the files this patch will touch are still the base version."""
+        for item in patch.get("files") or []:
+            relative = str(item.get("path") or "")
+            target = self.root / PurePosixPath(relative)
+            action = str(item.get("action") or "")
+            source_hash = str(item.get("source_sha256") or "").lower()
+            target_hash = str(item.get("sha256") or "").lower()
+            try:
+                if action == "add":
+                    if target.is_file():
+                        if target_hash and _sha256(target).lower() == target_hash:
+                            continue
+                        return False, f"本地已有不同的文件：{relative}"
+                    if target.exists():
+                        return False, f"本地路径不是普通文件：{relative}"
+                    continue
+                if not target.is_file():
+                    return False, f"缺少增量更新所需的文件：{relative}"
+                if source_hash and _sha256(target).lower() != source_hash:
+                    return False, f"本地文件已被修改：{relative}"
+            except OSError as exc:
+                return False, f"无法读取本地文件：{relative}（{exc}）"
+        return True, ""
+
     def _public_check(self, manifest: dict, *, from_cache: bool) -> dict:
         latest = str(manifest.get("version") or "")
         asset = self._asset_for(manifest)
@@ -393,6 +451,13 @@ class UpdateService:
         notes = str(manifest.get("notes") or "")
         if len(notes) > 30000:
             notes = notes[:30000] + "\n…"
+        patch = self._patch_candidate(manifest)
+        patch_note = ""
+        if patch is not None:
+            usable, reason = self._patch_preflight(patch)
+            if not usable:
+                patch = None
+                patch_note = reason
         return self._result(
             latest_version=latest,
             update_available=bool(is_newer(latest, self.version) and not skipped),
@@ -401,6 +466,8 @@ class UpdateService:
             published_at=str(manifest.get("published_at") or ""),
             release_url=str(manifest.get("release_url") or RELEASE_PAGE),
             asset=asset,
+            patch=patch,
+            patch_note=patch_note,
             checked_at=str(manifest.get("checked_at") or _now_iso()),
             from_cache=from_cache,
         )
@@ -446,7 +513,7 @@ class UpdateService:
         return {"ok": True, "skipped_version": self._state["skipped_version"]}
 
     # ------------------------------------------------------------ download
-    def start_download(self, kind: str | None = None) -> dict:
+    def start_download(self, kind: str | None = None, *, full: bool = False) -> dict:
         with self._lock:
             if self._download_thread and self._download_thread.is_alive():
                 return {"ok": True, "already_running": True, "download": dict(self._download)}
@@ -460,11 +527,35 @@ class UpdateService:
                 return {"ok": True, "already_running": True, "download": dict(self._download)}
             if not check.get("ok"):
                 return {"ok": False, "error": check.get("error") or "检查更新失败。", "hint": check.get("hint", "")}
+
+            patch = check.get("patch") if isinstance(check.get("patch"), dict) else None
             asset = check.get("asset") if isinstance(check.get("asset"), dict) else None
             desired_kind = kind or ("setup" if self.mode == "installed" else "portable")
+            fallback_reason = ""
+            if kind == "patch":
+                if patch is None:
+                    return {"ok": False, "error": "当前版本没有可用的增量更新。", "hint": "请下载完整更新包。"}
+                asset = patch
+                desired_kind = "patch"
+            elif kind in {"portable", "setup"}:
+                desired_kind = kind
+            elif not full:
+                if patch is not None:
+                    usable, reason = self._patch_preflight(patch)
+                    if usable:
+                        asset = patch
+                        desired_kind = "patch"
+                    else:
+                        fallback_reason = reason
+                        patch = None
+                else:
+                    fallback_reason = str(check.get("patch_note") or "")
+            if desired_kind == "patch" and patch is None:
+                desired_kind = "setup" if self.mode == "installed" else "portable"
+                asset = check.get("asset") if isinstance(check.get("asset"), dict) else None
             if not asset:
-                return {"ok": False, "error": "更新清单中没有可下载的文件。", "hint": "请打开项目 Release 页面手动下载。",}
-            if desired_kind not in {"portable", "setup"}:
+                return {"ok": False, "error": "更新清单中没有可下载的文件。", "hint": "请打开项目 Release 页面手动下载。"}
+            if desired_kind not in {"portable", "setup", "patch"}:
                 return {"ok": False, "error": "未知的更新包类型。"}
             url = str(asset.get("url") or "")
             if not any(url.startswith(prefix) for prefix in ALLOWED_DOWNLOAD_PREFIXES):
@@ -472,16 +563,19 @@ class UpdateService:
             filename = Path(str(asset.get("name") or "")).name
             if not filename or not re.search(r"\.(zip|exe)$", filename, re.I):
                 return {"ok": False, "error": "更新文件名无效。", "hint": "请打开项目 Release 页面手动下载。"}
+            message = "准备下载增量更新…" if desired_kind == "patch" else "准备下载更新…"
+            if fallback_reason:
+                message = "本地文件与增量基线不一致，改为下载完整包…"
             self._download = {
                 "state": "starting",
                 "percent": 0,
                 "downloaded": 0,
                 "total": int(asset.get("size") or 0),
-                "message": "准备下载更新…",
+                "message": message,
                 "error": "",
                 "hint": "",
                 "path": "",
-                "kind": kind or ("setup" if self.mode == "installed" else "portable"),
+                "kind": desired_kind,
                 "version": str(check.get("latest_version") or ""),
             }
             self._download_cancel.clear()
@@ -493,7 +587,13 @@ class UpdateService:
             )
             self._download_thread = thread
             thread.start()
-        return {"ok": True, "already_running": False, "download": dict(self._download)}
+        return {
+            "ok": True,
+            "already_running": False,
+            "download": dict(self._download),
+            "fell_back": bool(fallback_reason),
+            "fallback_reason": fallback_reason,
+        }
 
     def pause_download(self) -> dict:
         """Pause an active automatic download; the .part file is kept for resume."""
@@ -726,14 +826,18 @@ class UpdateService:
             raise UpdateError("更新包路径无效。") from exc
         if not path.is_file():
             raise UpdateError("更新包已不存在，请重新下载。")
-        if kind not in {"portable", "setup"}:
+        if kind not in {"portable", "setup", "patch"}:
             kind = "setup" if path.suffix.lower() == ".exe" else "portable"
+        if kind == "patch" and path.suffix.lower() != ".zip":
+            raise UpdateError("增量更新包必须是 ZIP 文件。")
         return path, kind
 
     def install(self, token: str, kind: str = "") -> dict:
         path, kind = self._resolve_package(token, kind)
         if kind == "setup":
             self._launch_setup_helper(path)
+        elif kind == "patch":
+            self._launch_patch_helper(path)
         else:
             self._launch_portable_helper(path)
         return {
@@ -791,6 +895,87 @@ class UpdateService:
             app_pid=os.getpid(),
             log_path=log_path,
         )
+        helper.write_text(script, encoding="utf-8-sig")
+        subprocess.Popen(
+            [
+                "powershell.exe",
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-WindowStyle",
+                "Hidden",
+                "-File",
+                str(helper),
+            ],
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            close_fds=True,
+            cwd=str(Path(tempfile.gettempdir())),
+        )
+        self._exit_soon()
+
+    def _inspect_patch_archive(self, archive: Path) -> dict:
+        try:
+            with zipfile.ZipFile(archive) as source:
+                names = source.namelist()
+                if len(names) > 20000:
+                    raise UpdateError("增量更新包文件数量异常，已拒绝。")
+                for name in names:
+                    if not _safe_member(name):
+                        raise UpdateError("增量更新包包含不安全的路径。")
+                if "patch.json" not in names:
+                    raise UpdateError("增量更新包缺少 patch.json。")
+                raw = source.read("patch.json")
+                info = json.loads(raw.decode("utf-8-sig"))
+                if not isinstance(info, dict):
+                    raise UpdateError("增量更新包描述无效。")
+                if str(info.get("base_version") or "") != self.version:
+                    raise UpdateError(
+                        f"增量更新包基线为 {info.get('base_version') or '未知'}，"
+                        f"当前版本为 {self.version}。"
+                    )
+                files = info.get("files")
+                if not isinstance(files, list) or not files:
+                    raise UpdateError("增量更新包没有文件列表。")
+                for item in files:
+                    if not isinstance(item, dict):
+                        raise UpdateError("增量更新包文件列表无效。")
+                    relative = str(item.get("path") or "")
+                    action = str(item.get("action") or "")
+                    if not relative or not _safe_member(relative):
+                        raise UpdateError("增量更新包包含不安全的文件路径。")
+                    if action not in {"add", "replace", "delete"}:
+                        raise UpdateError("增量更新包包含未知操作。")
+                    parts = PurePosixPath(relative.replace("\\", "/")).parts
+                    if parts and (parts[0].lower().startswith("unins") or parts[0].lower() == "cache"):
+                        raise UpdateError("增量更新包试图修改受保护的文件。")
+                    if action != "delete" and relative.replace("\\", "/") not in names:
+                        raise UpdateError(f"增量更新包缺少文件：{relative}")
+                return info
+        except zipfile.BadZipFile as exc:
+            raise UpdateError("增量更新包不是有效的 ZIP。", detail=str(exc)) from exc
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise UpdateError("增量更新包描述无法解析。", detail=str(exc)) from exc
+
+    def _launch_patch_helper(self, archive: Path) -> None:
+        info = self._inspect_patch_archive(archive)
+        pythonw = self.root / "python" / "pythonw.exe"
+        if not pythonw.is_file():
+            raise UpdateError("当前目录缺少 python/pythonw.exe，无法应用增量更新。")
+        template_path = Path(__file__).with_name("patch_helper.ps1")
+        try:
+            template = template_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            raise UpdateError("无法读取增量更新脚本。", detail=str(exc)) from exc
+        log_path = Path(tempfile.gettempdir()) / "pla-update.log"
+        script = (
+            template.replace("__TARGET__", _ps_quote(str(self.root)))
+            .replace("__ARCHIVE__", _ps_quote(str(archive)))
+            .replace("__BASE_VERSION__", _ps_quote(self.version))
+            .replace("__TARGET_VERSION__", _ps_quote(str(info.get("version") or "")))
+            .replace("__LOG__", _ps_quote(str(log_path)))
+            .replace("__APP_PID__", str(os.getpid()))
+        )
+        helper = Path(tempfile.gettempdir()) / f"pla-update-{uuid.uuid4().hex}.ps1"
         helper.write_text(script, encoding="utf-8-sig")
         subprocess.Popen(
             [

@@ -8,7 +8,8 @@ $BuildDir = Join-Path $Root "build"
 $DistDir = Join-Path $Root "dist-python"
 $Stage = Join-Path $DistDir "PLA-MMO-Seed-Path"
 $ReleaseDir = Join-Path $Root "release"
-$Version = "0.9.13"
+$Version = "0.9.14"
+$PreviousVersion = "0.9.13"
 $AppName = "PLA-MMO-Seed-Path"
 $PublicRepo = "junlifun/PLA-MMO-Seed-Path"
 $LegacyRepo = "Yuutalin/PLA-MMO-Seed-Path"
@@ -111,6 +112,28 @@ if (-not $PortableOnly) {
 }
 
 $SetupExe = Join-Path $ReleaseDir "$AppName-$Version-Setup.exe"
+
+# Build the full file manifest for the next release, plus an adjacent-version
+# patch from the previous manifest.  The updater only offers the patch when the
+# local copy still matches the base hashes.
+$ManifestDir = Join-Path $BuildDir "manifests"
+New-Item -ItemType Directory -Path $ManifestDir -Force | Out-Null
+$ManifestOut = Join-Path $ManifestDir "$Version.json"
+$PreviousManifest = Join-Path $ManifestDir "$PreviousVersion.json"
+$PatchZip = Join-Path $ReleaseDir "$AppName-$Version-patch-from-$PreviousVersion.zip"
+$PatchInfo = Join-Path $ReleaseDir "patch-$Version.json"
+$patchArgs = @(
+    (Join-Path $BuildDir "make_update_patch.py"),
+    "--root", $Stage,
+    "--version", $Version,
+    "--manifest", $ManifestOut
+)
+if (Test-Path $PreviousManifest) {
+    $patchArgs += @("--previous-manifest", $PreviousManifest, "--patch", $PatchZip, "--info", $PatchInfo)
+}
+& $PythonExe @patchArgs
+if ($LASTEXITCODE -ne 0) { throw "Manifest or patch generation failed." }
+
 $notesPath = Join-Path $Root "docs\RELEASE_NOTES.md"
 if (Test-Path $notesPath) {
     $notes = [IO.File]::ReadAllText($notesPath, [Text.Encoding]::UTF8).Trim()
@@ -140,6 +163,19 @@ if (Test-Path $SetupExe) {
         sha256 = (Get-FileHash $SetupExe -Algorithm SHA256).Hash.ToLower()
     }
 }
+$manifestPatch = $null
+if (Test-Path $PatchInfo) {
+    $patchData = [IO.File]::ReadAllText($PatchInfo, [Text.Encoding]::UTF8) | ConvertFrom-Json
+    $manifestPatch = @{
+        base_version = $patchData.base_version
+        version = $patchData.version
+        name = $patchData.name
+        url = "$assetBase/$([uri]::EscapeDataString([string]$patchData.name))"
+        size = $patchData.size
+        sha256 = $patchData.sha256
+        files = $patchData.files
+    }
+}
 $manifest = @{
     version = $Version
     published_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
@@ -147,11 +183,12 @@ $manifest = @{
     notes = $notes
     assets = $manifestAssets
 }
-$manifestJson = $manifest | ConvertTo-Json -Depth 8
+if ($manifestPatch) { $manifest.patch = $manifestPatch }
+$manifestJson = $manifest | ConvertTo-Json -Depth 12
 [IO.File]::WriteAllText((Join-Path $ReleaseDir "update.json"), $manifestJson, [Text.UTF8Encoding]::new($false))
 
 $hashLines = @()
-foreach ($file in Get-ChildItem $ReleaseDir -File | Where-Object { $_.Name -eq "update.json" -or $_.Name -like "*$Version*" -or $_.Name -like "pokeldn-slim-*" }) {
+foreach ($file in Get-ChildItem $ReleaseDir -File | Where-Object { $_.Name -eq "update.json" -or $_.Name -like "*$Version*" -or $_.Name -like "pokeldn-slim-*" } | Where-Object { $_.Name -notlike "patch-*.json" }) {
     $hash = Get-FileHash $file.FullName -Algorithm SHA256
     $hashLines += "$($hash.Hash.ToLower())  $($file.Name)"
 }

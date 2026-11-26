@@ -33,7 +33,7 @@ from pla_mmo.pokemon_assets import PokemonAssetManager
 from pla_mmo.launcher import choose_local_port
 from pla_mmo.updater import UpdateError, UpdateService
 
-APP_VERSION = "0.9.13"
+APP_VERSION = "0.9.14"
 AUTHOR_NAME = "君粒"
 
 PROJECT_ROOT = get_project_root()
@@ -343,7 +343,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     def update_download():
         body = request.get_json(silent=True) or {}
         kind = str(body.get("kind") or "").strip() or None
-        result = update_service.start_download(kind)
+        result = update_service.start_download(kind, full=bool(body.get("full")))
         return jsonify(result)
 
     @app.post("/api/update/pause")

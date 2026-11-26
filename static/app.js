@@ -6419,11 +6419,12 @@ function renderUpdateCheck(data) {
       status.textContent = "检查更新失败。";
       status.classList.add("error");
     } else if (data.update_available) {
-      const asset = data.asset || {};
-      const size = asset.size ? ` · ${formatResourceSize(asset.size)}` : "";
+      const pack = data.patch || data.asset || {};
+      const kind = data.patch ? "增量包" : "完整包";
+      const size = pack.size ? `，${formatResourceSize(pack.size)}` : "";
       status.textContent = data.skipped
         ? `发现 v${data.latest_version}，但你已跳过此版本。`
-        : `发现新版本 v${data.latest_version}${size}。`;
+        : `发现新版本 v${data.latest_version}（${kind}${size}）。`;
       status.classList.add("success");
     } else {
       status.textContent = "当前已经是最新版本。";
@@ -6440,7 +6441,10 @@ function renderUpdateCheck(data) {
     const skip = $("update-skip");
     if (skip) skip.textContent = data.skipped ? "恢复更新提示" : "跳过此版本";
     const download = $("update-download");
-    if (download) download.classList.toggle("hidden", Boolean(data.skipped));
+    if (download) {
+      download.classList.toggle("hidden", Boolean(data.skipped));
+      download.textContent = data.patch ? "下载增量更新" : "下载更新包";
+    }
     if (data.skipped) {
       setUpdateBannerVisible(false);
     } else {
@@ -6466,10 +6470,11 @@ function renderUpdateDownload(download) {
   const button = $("update-download");
   const pause = $("update-pause");
   const install = $("update-install");
+  const idleLabel = updateCheckData?.patch ? "下载增量更新" : "下载更新包";
   if (!box) return;
   if (!download || download.state === "idle") {
     box.classList.add("hidden");
-    if (button) { button.disabled = false; button.textContent = "下载更新包"; }
+    if (button) { button.disabled = false; button.textContent = idleLabel; }
     if (pause) pause.classList.add("hidden");
     return;
   }
@@ -6494,7 +6499,7 @@ function renderUpdateDownload(download) {
       ? "继续下载"
       : active
         ? (state === "pausing" ? "正在暂停…" : "正在下载…")
-        : (state === "success" ? "重新下载" : "下载更新包");
+        : (state === "success" ? "重新下载" : idleLabel);
   }
   if (pause) {
     pause.classList.toggle("hidden", !canPause);
