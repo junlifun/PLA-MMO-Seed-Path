@@ -4454,6 +4454,7 @@ let linkSeedLastLog = "";
 let linkSeedTerminalSeen = "";
 let linkSeedStarting = false;
 let linkSeedRunning = false;
+let linkSeedCount = 0;
 // 左上角联机按钮的四态：idle → starting → running → stopping → idle。
 // 点击后立即切到过渡态（乐观反馈），不等后端响应；轮询期间不回写过渡态。
 let linkQuickUiState = "idle";
@@ -4800,6 +4801,7 @@ async function loadLinkSeedSettings() {
     const settings = await api("/api/settings", { timeoutMs: 12000 });
     if (settings.link_channel) $("link-seed-channel").value = String(settings.link_channel);
     if (settings.link_seconds) $("link-seed-seconds").value = String(settings.link_seconds);
+    $("link-seed-exchange-name").value = String(settings.link_exchange_name || "seed");
   } catch (_) {
     // Defaults in the markup remain usable.
   }
@@ -5053,10 +5055,16 @@ function renderLinkSeedProgress(data) {
     text = "等待 Switch 连接";
     detail = "在祝庆村找交换 NPC → 本地交换 → 输入本页相同的 8 位密码。";
   } else if (phase === "collecting") {
-    text = count >= 4 ? "四只已收齐" : `请选择第 ${count + 1}/4 只`;
-    detail = count >= 4
-      ? "正在正常结束联机，随后开始反推 Seed。"
-      : "选中最初捕获的宝可梦，进入确认页看到收录后按 B 返回；不要确认交换。";
+    if (count >= 4) {
+      text = "四只已收齐";
+      detail = "正在正常结束联机，随后开始反推 Seed。";
+    } else if (count >= 2) {
+      text = `已收录 ${count} 只，可继续或直接完成`;
+      detail = "若已经结束交换，点下方「完成采集并反推」；2–3 只也可以尝试反推，4 只最稳。";
+    } else {
+      text = `请选择第 ${count + 1}/4 只`;
+      detail = "选中最初捕获的宝可梦，进入确认页看到收录后按 B 返回；不要确认交换。";
+    }
   } else if (phase === "solving") {
     const entity = Math.max(1, Math.min(4, Number(data.entity) || 1));
     const percent = Math.round(Number(data.percent) || 0);
@@ -5069,7 +5077,7 @@ function renderLinkSeedProgress(data) {
     detail = "关闭联机输入后，采集进程会正常离开交换。";
   } else if (phase === "done") {
     text = "Seed 已找到并填入左侧";
-    detail = "可以点右侧「填入并计算」，或先核对四只卡片再计算。";
+    detail = "可以点右侧「填入并计算」，或先核对已收录的记录再计算。";
   } else if (phase === "failed") {
     text = "采集失败";
     detail = data.error || "请打开运行日志查看原因；修好后可用「用最近记录重算」。";
@@ -5395,6 +5403,7 @@ function renderLinkSeedStatus(data) {
   const running = Boolean(data.running);
   linkSeedRunning = running;
   const count = Math.max(0, Math.min(4, Number(data.count) || 0));
+  linkSeedCount = count;
   const phaseLabel = LINK_SEED_PHASE_LABELS[phase] || phase;
 
   renderLinkSeedCards(data);
@@ -5461,12 +5470,23 @@ function renderLinkSeedStatus(data) {
     solveCurrent.classList.toggle("hidden", !canSolveCurrent);
     if (canSolveCurrent) solveCurrent.textContent = `用已收录的 ${count} 只反推 Seed`;
   }
+  const finishPartial = $("link-seed-finish-partial");
+  if (finishPartial) {
+    const canFinishPartial = running && count >= 2 && count < 4
+      && !["solving", "stopping"].includes(phase);
+    finishPartial.classList.toggle("hidden", !canFinishPartial);
+    finishPartial.disabled = !canFinishPartial;
+    if (canFinishPartial) {
+      finishPartial.textContent = `已交换完 ${count} 只？完成采集并反推`;
+    }
+  }
   $("link-seed-probe-btn").disabled = running;
   $("link-seed-choose-keys").disabled = running;
   $("link-seed-solve-last").disabled = running;
   $("link-seed-code").disabled = running;
   $("link-seed-channel").disabled = running;
   $("link-seed-seconds").disabled = running;
+  $("link-seed-exchange-name").disabled = running;
   $("link-seed-start").textContent = linkSeedStarting
     ? "正在启动…"
     : running
@@ -5577,7 +5597,8 @@ async function startLinkSeed() {
       body: JSON.stringify({
         code,
         channel: Number($("link-seed-channel").value || 6),
-        seconds: Number($("link-seed-seconds").value || 1800)
+        seconds: Number($("link-seed-seconds").value || 1800),
+        exchange_name: $("link-seed-exchange-name").value.trim() || "seed"
       }),
       timeoutMs: 90000
     });
@@ -5606,6 +5627,12 @@ async function stopLinkSeed() {
   } catch (error) {
     showLinkSeedError(`停止失败：${error.message}`);
   }
+}
+
+async function finishPartialLinkSeed() {
+  const count = Math.max(2, Math.min(3, Number(linkSeedCount) || 2));
+  showToast(`正在用已收录的 ${count} 只记录结束采集并反推 Seed…`);
+  await stopLinkSeed();
 }
 
 async function solveLastLinkSeed() {
@@ -5693,6 +5720,7 @@ $("link-seed-close").addEventListener("click", closeLinkSeedModal);
 $("link-seed-detail-toggle").addEventListener("click", toggleLinkSeedDetail);
 $("link-seed-start").addEventListener("click", startLinkSeed);
 $("link-seed-stop").addEventListener("click", stopLinkSeed);
+$("link-seed-finish-partial").addEventListener("click", finishPartialLinkSeed);
 $("link-seed-probe-btn").addEventListener("click", () => probeLinkSeed(true));
 $("link-seed-choose-keys").addEventListener("click", chooseLinkSeedKeys);
 $("link-seed-solve-last").addEventListener("click", solveLastLinkSeed);
@@ -6356,15 +6384,18 @@ function renderUpdateDownload(download) {
   updateDownloadState = download || null;
   const box = $("update-progress");
   const button = $("update-download");
+  const pause = $("update-pause");
   const install = $("update-install");
   if (!box) return;
   if (!download || download.state === "idle") {
     box.classList.add("hidden");
     if (button) { button.disabled = false; button.textContent = "下载更新包"; }
+    if (pause) pause.classList.add("hidden");
     return;
   }
   const state = String(download.state || "");
-  const active = state === "starting" || state === "downloading" || state === "verifying";
+  const active = state === "starting" || state === "downloading" || state === "verifying" || state === "pausing";
+  const canPause = state === "starting" || state === "downloading";
   const percent = Math.max(0, Math.min(100, Number(download.percent) || 0));
   box.classList.remove("hidden");
   if ($("update-progress-label")) $("update-progress-label").textContent = download.message || "准备下载…";
@@ -6379,7 +6410,16 @@ function renderUpdateDownload(download) {
   }
   if (button) {
     button.disabled = active;
-    button.textContent = active ? "正在下载…" : (state === "success" ? "重新下载" : "下载更新包");
+    button.textContent = state === "paused"
+      ? "继续下载"
+      : active
+        ? (state === "pausing" ? "正在暂停…" : "正在下载…")
+        : (state === "success" ? "重新下载" : "下载更新包");
+  }
+  if (pause) {
+    pause.classList.toggle("hidden", !canPause);
+    pause.disabled = state === "pausing";
+    pause.textContent = state === "pausing" ? "正在暂停…" : "暂停下载";
   }
   if (install) {
     const ready = state === "success" && download.path;
@@ -6433,6 +6473,28 @@ async function startUpdateDownload() {
   }
 }
 
+async function pauseUpdateDownload(quiet = false) {
+  try {
+    const data = await updateRequest("/api/update/pause", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+      timeoutMs: 15000,
+    });
+    if (!data.ok) {
+      if (!quiet) setUpdateError(data.error || "当前无法暂停下载。", "");
+      return false;
+    }
+    renderUpdateDownload(data.download || { state: "pausing", message: "正在暂停下载…" });
+    pollUpdateDownload();
+    if (!quiet) showToast("正在暂停自动下载，已下载的部分会保留。");
+    return true;
+  } catch (error) {
+    if (!quiet) setUpdateError(`暂停下载失败：${error.message}`, "");
+    return false;
+  }
+}
+
 function pollUpdateDownload() {
   if (updatePollTimer !== null) window.clearTimeout(updatePollTimer);
   const tick = async () => {
@@ -6447,6 +6509,10 @@ function pollUpdateDownload() {
         return;
       }
       if (state === "failed") return;
+      if (state === "paused") {
+        showToast("自动下载已暂停，可继续下载或改用手动安装。");
+        return;
+      }
       updatePollTimer = window.setTimeout(tick, 700);
     } catch (error) {
       setUpdateError(`读取下载进度失败：${error.message}`, "");
@@ -6717,9 +6783,14 @@ function initUpdateUI() {
   });
   $("update-manual-pick")?.addEventListener("click", () => $("update-manual-file")?.click());
   $("update-manual-file")?.addEventListener("change", event => {
+    const downloadState = String(updateDownloadState?.state || "");
+    if (["starting", "downloading", "verifying", "pausing"].includes(downloadState)) {
+      pauseUpdateDownload(true);
+    }
     resetManualUpdateSelection();
     setManualUpdateFilename(event.target?.files?.[0]?.name || "");
   });
+  $("update-pause")?.addEventListener("click", () => pauseUpdateDownload(false));
   $("update-manual-validate")?.addEventListener("click", validateManualUpdate);
   $("update-manual-install")?.addEventListener("click", installManualUpdate);
   $("cleanup-refresh")?.addEventListener("click", loadCleanupTargets);

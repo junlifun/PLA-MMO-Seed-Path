@@ -33,7 +33,7 @@ from pla_mmo.pokemon_assets import PokemonAssetManager
 from pla_mmo.launcher import choose_local_port
 from pla_mmo.updater import UpdateError, UpdateService
 
-APP_VERSION = "0.9.10"
+APP_VERSION = "0.9.11"
 AUTHOR_NAME = "君粒"
 
 PROJECT_ROOT = get_project_root()
@@ -202,13 +202,15 @@ def create_app(test_config: dict | None = None) -> Flask:
         body = request.get_json(silent=True) or {}
         channel = body.get("channel", 6)
         seconds = body.get("seconds", 1800)
-        result = seed_link.start(str(body.get("code") or ""), channel, seconds)
+        exchange_name = str(body.get("exchange_name") or "seed").strip() or "seed"
+        result = seed_link.start(str(body.get("code") or ""), channel, seconds, exchange_name)
         if result.get("ok"):
-            # Remember the operator's channel/wait choice for the next session.
+            # Remember the operator's channel/wait/name choice for the next session.
             try:
                 settings_store.update({
                     "link_channel": int(channel),
                     "link_seconds": int(seconds),
+                    "link_exchange_name": exchange_name,
                 })
             except (TypeError, ValueError, OSError):
                 pass
@@ -343,6 +345,10 @@ def create_app(test_config: dict | None = None) -> Flask:
         kind = str(body.get("kind") or "").strip() or None
         result = update_service.start_download(kind)
         return jsonify(result)
+
+    @app.post("/api/update/pause")
+    def update_pause():
+        return jsonify(update_service.pause_download())
 
     @app.get("/api/update/download/status")
     def update_download_status():

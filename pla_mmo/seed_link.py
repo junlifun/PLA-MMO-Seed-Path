@@ -778,6 +778,7 @@ class SeedLinkService:
             "settings": {
                 "channel": int(self._settings().get("link_channel") or DEFAULT_CHANNEL),
                 "seconds": int(self._settings().get("link_seconds") or DEFAULT_SECONDS),
+                "exchange_name": str(self._settings().get("link_exchange_name") or "seed"),
             },
         }
 
@@ -821,10 +822,13 @@ class SeedLinkService:
             return None
         return path
 
-    def start(self, code: str, channel: int, seconds: int) -> dict:
+    def start(self, code: str, channel: int, seconds: int, exchange_name: str = "seed") -> dict:
         code = str(code or "").strip()
         if not re.fullmatch(r"\d{8}", code):
             return {"ok": False, "error": "联机密码必须是 8 位数字。"}
+        exchange_name = str(exchange_name or "").strip() or "seed"
+        if len(exchange_name) > 12 or not re.fullmatch(r"[^\x00-\x1f|]{1,12}", exchange_name):
+            return {"ok": False, "error": "连接人名字必须为 1–12 个字符，且不能包含竖线或控制字符。"}
         try:
             channel = int(channel)
             seconds = int(seconds)
@@ -869,6 +873,7 @@ class SeedLinkService:
             "--code", code,
             "--channel", str(channel),
             "--seconds", str(seconds),
+            "--exchange-name", exchange_name,
             "--keys", str(keys),
             "--trainer", self.resolve_trainer(),
             "--stamp", time.strftime("%Y%m%d-%H%M%S"),

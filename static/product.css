@@ -2541,7 +2541,8 @@ body.dark-mode .link-seed-log { color: #c7d5c9; }
   .spawn-map-confirm-copy { flex-basis: 100%; }
 }
 
-.link-seed-solve-current {
+.link-seed-solve-current,
+.link-seed-finish-partial {
   width: 100%;
   min-height: 36px;
   border-color: var(--accent);

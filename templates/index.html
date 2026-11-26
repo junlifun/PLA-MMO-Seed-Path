@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>洗翠闪光路径档案 · PLA MMO Path Finder · 君粒</title>
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.10') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.10') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.10') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.10') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.10-multi20') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='update.css', v='0.9.10') }}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.11') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.11') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.11') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.11') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.11-multi20') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='update.css', v='0.9.11') }}">
 </head>
 <body data-theme="{{ appearance_theme|default('forest') }}"
       data-appearance-saved="{{ '1' if appearance_preferences_saved|default(false) else '0' }}"
@@ -781,6 +781,7 @@
                   <pre id="update-notes" class="update-notes"></pre>
                   <div class="button-row">
                     <button id="update-download" class="btn btn-primary" type="button">下载更新包</button>
+                    <button id="update-pause" class="btn btn-ghost hidden" type="button">暂停下载</button>
                     <button id="update-install" class="btn btn-secondary hidden" type="button">退出并安装</button>
                     <button id="update-skip" class="btn btn-ghost" type="button">跳过此版本</button>
                   </div>
@@ -984,6 +985,7 @@
             <button id="link-seed-start" class="link-seed-button link-seed-button-primary link-seed-start" type="button">开始采集</button>
             <button id="link-seed-stop" class="link-seed-button link-seed-button-secondary" type="button" disabled>停止</button>
           </div>
+          <button id="link-seed-finish-partial" class="link-seed-button link-seed-button-secondary link-seed-finish-partial hidden" type="button">用已收录的 2 只完成采集</button>
           <button id="link-seed-solve-current" class="link-seed-button link-seed-button-secondary link-seed-solve-current hidden" type="button">用已收录记录反推 Seed</button>
           <div id="link-seed-error" class="link-seed-error hidden" role="alert"></div>
 
@@ -1027,6 +1029,10 @@
                   <option value="2400">40 分钟</option>
                   <option value="3600">60 分钟</option>
                 </select>
+              </label>
+              <label class="link-seed-field" for="link-seed-exchange-name">
+                <span>连接人名字</span>
+                <input id="link-seed-exchange-name" type="text" maxlength="12" autocomplete="off" value="seed" placeholder="seed">
               </label>
             </div>
             <div class="link-seed-advanced-actions">
@@ -1123,8 +1129,8 @@
       <div id="result-detail-body" class="result-detail-body"></div>
     </section>
   </div>
-  <script src="{{ url_for('static', filename='result_view.js', v='0.9.10') }}"></script>
-  <script src="{{ url_for('static', filename='app.js', v='0.9.10-multi20') }}"></script>
+  <script src="{{ url_for('static', filename='result_view.js', v='0.9.11') }}"></script>
+  <script src="{{ url_for('static', filename='app.js', v='0.9.11-multi20') }}"></script>
 </body>
 </html>
 

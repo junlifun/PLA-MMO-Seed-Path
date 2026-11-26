@@ -15,3 +15,10 @@
   - `dist-python` 自带 Python + 旧 r2 运行时（缺 netlink）能 `import netlink` 并让 `pla_host.py` 进入 `AP up` / `Hosting`，不再返回 2。
   - 测试版 UI 启动采集后进入 `waiting`，日志显示“正在等待 Switch”，未再出现代码 2；停止采集正常释放 COM5。
   - 测试包在 `D:\PLA-MMO-Seed-Path-Update\v0.9.10`，已带运行时、求解器、密钥和测试 README。
+## 2026-11-27
+
+- 自动更新支持暂停/继续；选择手动更新包时自动暂停正在下载的任务，保留 `.part` 以便续传。
+- 联机采集支持 2–3 只直接完成：新增「完成采集并反推」按钮，减少强行凑 4 只的困扰。
+- 联机设置新增「连接人名字」，默认 `seed`，可改为 1–12 个字符；采集器通过 `--exchange-name` 传给主机参数。
+- 版本号 0.9.11（本地测试，未上传）。
+- 本地验证：4 MB 限速下载暂停后续传 SHA 一致；采集器参数输出 `--data-exchange-name seed`；2–3 只停止后走已有 `_finish()` 反推路径。

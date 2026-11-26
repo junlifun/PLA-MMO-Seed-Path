@@ -248,6 +248,7 @@ class UpdateService:
         self._state = self._load_state()
         self._check_result: dict | None = None
         self._download_thread: threading.Thread | None = None
+        self._download_cancel = threading.Event()
         self._download = {
             "state": "idle",
             "percent": 0,
@@ -483,6 +484,7 @@ class UpdateService:
                 "kind": kind or ("setup" if self.mode == "installed" else "portable"),
                 "version": str(check.get("latest_version") or ""),
             }
+            self._download_cancel.clear()
             thread = threading.Thread(
                 target=self._download_worker,
                 args=(asset, filename, self._download["kind"]),
@@ -492,6 +494,20 @@ class UpdateService:
             self._download_thread = thread
             thread.start()
         return {"ok": True, "already_running": False, "download": dict(self._download)}
+
+    def pause_download(self) -> dict:
+        """Pause an active automatic download; the .part file is kept for resume."""
+        with self._lock:
+            if not self._download_thread or not self._download_thread.is_alive():
+                return {"ok": False, "error": "当前没有正在进行的自动下载。"}
+            if self._download.get("state") not in {"starting", "downloading", "verifying"}:
+                return {"ok": False, "error": "当前下载无法暂停。"}
+            self._download_cancel.set()
+            self._download.update({
+                "state": "pausing",
+                "message": "正在暂停下载…",
+            })
+            return {"ok": True, "download": dict(self._download)}
 
     def _download_worker(self, asset: dict, filename: str, kind: str) -> None:
         destination = self.update_dir / filename
@@ -511,6 +527,9 @@ class UpdateService:
                 )
                 return
 
+            if self._download_cancel.is_set():
+                self._set_download(state="paused", message="下载已暂停，可继续下载。", hint="")
+                return
             offset = part.stat().st_size if part.is_file() else 0
             if expected_size and offset > expected_size:
                 part.unlink(missing_ok=True)
@@ -531,6 +550,13 @@ class UpdateService:
                 last_update = 0.0
                 with part.open(mode) as handle:
                     while True:
+                        if self._download_cancel.is_set():
+                            self._set_download(
+                                state="paused",
+                                message=f"下载已暂停（{received * 100 // total if total else 0}%），可继续下载。",
+                                hint="",
+                            )
+                            return
                         chunk = response.read(256 * 1024)
                         if not chunk:
                             break
@@ -590,6 +616,9 @@ class UpdateService:
 
     # -------------------------------------------------------------- manual
     def stage_manual(self, storage) -> dict:
+        # A manual package always wins over a background auto-download.
+        if self._download_thread and self._download_thread.is_alive():
+            self.pause_download()
         filename = Path(getattr(storage, "filename", "") or "").name
         suffix = Path(filename).suffix.lower()
         if suffix not in {".zip", ".exe"}:

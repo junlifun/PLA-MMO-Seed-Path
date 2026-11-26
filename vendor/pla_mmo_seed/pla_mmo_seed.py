@@ -42,6 +42,7 @@ def build_parser():
     parser.add_argument("--code", default="00000000")
     parser.add_argument("--channel", type=int, default=6)
     parser.add_argument("--seconds", type=int, default=1800)
+    parser.add_argument("--exchange-name", default="seed")
     parser.add_argument("--keys", default="")
     parser.add_argument("--trainer", default="")
     parser.add_argument("--stamp", default="")
@@ -1765,6 +1766,9 @@ def host_arguments(args, offer_path, capture_dir, keys_path, seconds_override=No
         raise ValueError("无线信道必须在 1 到 13 之间。")
     if not 120 <= args.seconds <= 3600:
         raise ValueError("最长等待时间必须在 120 到 3600 秒之间。")
+    exchange_name = str(getattr(args, "exchange_name", "") or "seed").strip() or "seed"
+    if len(exchange_name) > 12 or not re.fullmatch(r"[^\x00-\x1f|]{1,12}", exchange_name):
+        raise ValueError("连接人名字必须为 1–12 个字符，且不能包含竖线或控制字符。")
 
     run_seconds = max(1, int(seconds_override if seconds_override is not None else args.seconds))
     return [
@@ -1776,7 +1780,7 @@ def host_arguments(args, offer_path, capture_dir, keys_path, seconds_override=No
         "--sustain",
         "--clock",
         "--data-exchange",
-        "--data-exchange-name", "POKELDN",
+        "--data-exchange-name", exchange_name,
         "--data-exchange-id", "11223344",
         "--game-channel",
         "--trade-box",
