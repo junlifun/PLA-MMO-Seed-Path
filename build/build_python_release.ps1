@@ -8,7 +8,7 @@ $BuildDir = Join-Path $Root "build"
 $DistDir = Join-Path $Root "dist-python"
 $Stage = Join-Path $DistDir "PLA-MMO-Seed-Path"
 $ReleaseDir = Join-Path $Root "release"
-$Version = "0.9.6"
+$Version = "0.9.7"
 $AppName = "PLA-MMO-Seed-Path"
 
 function Find-Python {

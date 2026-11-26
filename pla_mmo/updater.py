@@ -251,6 +251,20 @@ class UpdateService:
         }
         self._manual: dict | None = None
         self._cached_check: dict | None = self._state.get("cached_check") or None
+        self._cleanup_stale_backups()
+
+    def _cleanup_stale_backups(self) -> None:
+        """Remove ``.update-old-*`` copies left by an earlier portable update.
+
+        The restarting application can still hold WebView2 files for a few
+        seconds after the helper's final cleanup attempt, so the helper may not
+        be able to delete its backup.  The new process does not use that
+        directory, and retrying here makes the next launch finish the job.
+        """
+        pattern = f"{self.root.name}.update-old-*"
+        for backup in self.root.parent.glob(pattern):
+            if backup.is_dir():
+                shutil.rmtree(backup, ignore_errors=True)
 
     # --------------------------------------------------------------- state
     def _load_state(self) -> dict:
@@ -289,14 +303,24 @@ class UpdateService:
         base.update(changes)
         return base
 
+    def _normalize_check(self, value: Any) -> dict | None:
+        if not isinstance(value, dict):
+            return None
+        item = dict(value)
+        item["current_version"] = self.version
+        latest = str(item.get("latest_version") or "")
+        item["update_available"] = bool(is_newer(latest, self.version) and not item.get("skipped"))
+        return item
+
     def snapshot(self) -> dict:
         with self._lock:
             download = dict(self._download)
+            cached = self._normalize_check(self._cached_check)
         return {
             "ok": True,
             "current_version": self.version,
             "mode": self.mode,
-            "check": dict(self._cached_check) if self._cached_check else None,
+            "check": cached,
             "download": download,
             "manual": dict(self._manual) if self._manual else None,
             "update_dir": str(self.update_dir),
@@ -356,7 +380,7 @@ class UpdateService:
             notes = notes[:30000] + "\n…"
         return self._result(
             latest_version=latest,
-            update_available=is_newer(latest, self.version),
+            update_available=bool(is_newer(latest, self.version) and not skipped),
             skipped=skipped,
             notes=notes,
             published_at=str(manifest.get("published_at") or ""),
@@ -371,13 +395,13 @@ class UpdateService:
         with self._lock:
             cached = self._cached_check
             last = str(self._state.get("last_check_at") or "")
-        if not force and cached and last:
+        if not force and cached and last and cached.get("current_version") == self.version:
             try:
                 age = time.time() - datetime.fromisoformat(last).timestamp()
             except ValueError:
                 age = 86401
             if 0 <= age < 86400:
-                return {**cached, "from_cache": True}
+                return {**self._normalize_check(cached), "from_cache": True}
 
         try:
             manifest = self._fetch_manifest()
@@ -412,7 +436,7 @@ class UpdateService:
             if self._download_thread and self._download_thread.is_alive():
                 return {"ok": True, "already_running": True, "download": dict(self._download)}
             check = self._cached_check
-        if not check:
+        if not check or check.get("current_version") != self.version:
             check = self.check(force=True)
             with self._lock:
                 self._cached_check = check
@@ -781,6 +805,12 @@ class UpdateService:
         threading.Timer(1.0, _exit).start()
 
     # ------------------------------------------------------------- cleanup
+    def _backup_dirs(self) -> list[Path]:
+        return sorted(
+            path for path in self.root.parent.glob(f"{self.root.name}.update-old-*")
+            if path.is_dir()
+        )
+
     def cleanup_targets(self) -> list[dict]:
         data = self.data_dir
         root = self.root
@@ -851,6 +881,16 @@ class UpdateService:
                 "default": False,
             },
         ]
+        backups = self._backup_dirs()
+        if backups:
+            specs.append({
+                "key": "update_backups",
+                "label": "旧版本程序备份",
+                "path": backups[0],
+                "extra": backups[1:],
+                "description": "便携版更新后留下的旧程序目录；确认新版本可正常使用后可删除。",
+                "default": True,
+            })
         result = []
         for spec in specs:
             paths = [spec["path"], *spec.get("extra", [])]

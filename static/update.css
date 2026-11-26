@@ -20,6 +20,50 @@
 
 .update-panel { margin-bottom: 14px; }
 .update-panel:last-child { margin-bottom: 0; }
+
+/* v0.9.7 — keep the update tab in the same card rhythm as the other settings tabs.
+   The old panels were transparent and edge-to-edge, so long notes and the native
+   file picker collided with the modal padding at narrower window sizes. */
+#settings-tab-updates {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+#settings-tab-updates[hidden] { display: none !important; }
+#settings-tab-updates .update-panel {
+  min-width: 0;
+  margin: 0;
+  padding: 17px 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface-2);
+  box-shadow: none;
+}
+#settings-tab-updates .update-panel .settings-block-heading { margin-bottom: 10px; }
+#settings-tab-updates .update-panel > .field-note { margin: 0; line-height: 1.65; }
+#settings-tab-updates .update-version-row { background: var(--surface-solid); }
+#settings-tab-updates .button-row {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+#settings-tab-updates .update-manual-row { align-items: center; }
+#settings-tab-updates .update-manual-filename {
+  flex: 1 1 120px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#settings-tab-updates .update-available { background: var(--surface-solid); }
+#settings-tab-updates .cleanup-list { margin-bottom: 2px; }
+#settings-tab-updates .cleanup-item { background: var(--surface-solid); }
+#settings-tab-updates .update-notes { background: var(--surface-solid); }
 .update-version-row {
   display: flex;
   flex-wrap: wrap;

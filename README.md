@@ -6,17 +6,17 @@
 > 旧仓库仅保留测 Seed 相关功能；本项目同时支持联机采集 Seed、地图点位和闪光路径计算。
 
 - 作者：**君粒**
-- 当前版本：**v0.9.6**
+- 当前版本：**v0.9.7**
 - 许可证：**GPL v3.0**
 - 平台：Windows 10 / 11
 - 状态：公开仓库
 
 ## 下载
 
-- [Windows 安装版 v0.9.6](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.6/PLA-MMO-Seed-Path-0.9.6-Setup.exe)
-- [Windows 便携版 v0.9.6](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.6/PLA-MMO-Seed-Path-0.9.6-portable.zip)
-- [Pokeldn 精简运行时](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.6/pokeldn-slim-v0.66.12.zip)
-- [SHA256 校验文件](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.6/SHA256SUMS.txt)
+- [Windows 安装版 v0.9.7](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.7/PLA-MMO-Seed-Path-0.9.7-Setup.exe)
+- [Windows 便携版 v0.9.7](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.7/PLA-MMO-Seed-Path-0.9.7-portable.zip)
+- [Pokeldn 精简运行时](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.7/pokeldn-slim-v0.66.12.zip)
+- [SHA256 校验文件](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.7/SHA256SUMS.txt)
 
 安装版按用户安装，不需要管理员权限，安装后从开始菜单或桌面快捷方式启动。
 
@@ -47,12 +47,12 @@ Start-PLA.bat
 
 ## 更新与卸载
 
-从 v0.9.6 开始，设置 →「更新」可以检查 GitHub 最新版本、查看更新日志并下载更新包。
+从 v0.9.6 开始，设置 →「更新与维护」可以检查 GitHub 最新版本、查看更新日志并下载更新包。
 
 - 安装版会下载 Setup，确认后退出并静默安装，完成后自动重新打开。
 - 便携版会下载 portable ZIP，在原目录替换程序文件，保留 `cache`、地图标注和自定义图片。
 - 网络下载失败时，可以打开 Release 页面手动下载，再在「手动更新包」中选择 ZIP 或 Setup；程序会检查包结构，ZIP 还会检查版本和可选的 SHA256。
-- 第一次从 v0.9.5 升级到 v0.9.6 需要手动安装一次；v0.9.5 没有更新中心。
+- v0.9.5 及更早版本没有更新中心，第一次升级仍需手动安装；从 v0.9.6 开始可以应用内更新。
 - 安装版的卸载程序会列出缓存、日志、设置和更新包，可勾选是否一起删除。程序内「设置 → 更新」下方也有清理入口。
 - 更新不会包含 `prod.keys`、用户存档、日志或 `cache` 中的资源。
 
@@ -95,8 +95,8 @@ python app.py
 输出在 `release`：
 
 ```text
-PLA-MMO-Seed-Path-0.9.6-Setup.exe
-PLA-MMO-Seed-Path-0.9.6-portable.zip
+PLA-MMO-Seed-Path-0.9.7-Setup.exe
+PLA-MMO-Seed-Path-0.9.7-portable.zip
 update.json
 SHA256SUMS.txt
 ```
@@ -125,7 +125,7 @@ powershell -ExecutionPolicy Bypass -File build\build_python_release.ps1 -Portabl
 当前资源地址：
 
 ```text
-https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.6/pokeldn-slim-v0.66.12.zip
+https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.7/pokeldn-slim-v0.66.12.zip
 ```
 
 下载后在程序「设置 → 资源管理」中自动安装，或手动解压到：

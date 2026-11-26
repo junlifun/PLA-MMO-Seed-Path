@@ -920,9 +920,14 @@ function finishSettingsModalClose(modal) {
     window.clearTimeout(settingsModalCloseTimer);
     settingsModalCloseTimer = null;
   }
+  if (modal._settingsCloseAnimationEnd) {
+    modal.removeEventListener("animationend", modal._settingsCloseAnimationEnd);
+    delete modal._settingsCloseAnimationEnd;
+  }
   modal.classList.add("hidden");
   modal.classList.remove("is-opening", "is-closing");
   modal.style.removeProperty("display");
+  modal.style.removeProperty("pointer-events");
   modal.setAttribute("aria-hidden", "true");
   modal.inert = true;
   document.body.classList.remove("settings-modal-open");
@@ -943,10 +948,15 @@ function openSettingsModal(trigger = null) {
     window.clearTimeout(settingsModalOpenTimer);
     settingsModalOpenTimer = null;
   }
+  if (modal._settingsCloseAnimationEnd) {
+    modal.removeEventListener("animationend", modal._settingsCloseAnimationEnd);
+    delete modal._settingsCloseAnimationEnd;
+  }
   settingsModalTrigger = trigger || document.activeElement;
   activateSettingsTab(trigger?.dataset?.settingsTarget || "appearance");
   modal.classList.remove("hidden", "is-closing", "is-opening");
   modal.style.display = "grid";
+  modal.style.removeProperty("pointer-events");
   modal.inert = false;
   modal.setAttribute("aria-hidden", "false");
   document.body.classList.add("settings-modal-open");
@@ -960,11 +970,30 @@ function closeSettingsModal() {
   if (modal.classList.contains("is-closing")) return;
   modal.classList.remove("is-opening");
   modal.classList.add("is-closing");
-  if (settingsModalCloseTimer !== null) window.clearTimeout(settingsModalCloseTimer);
+  modal.style.pointerEvents = "none";
+  if (settingsModalCloseTimer !== null) {
+    window.clearTimeout(settingsModalCloseTimer);
+    settingsModalCloseTimer = null;
+  }
+  // Wait for the backdrop fade to actually finish before hiding it. Hiding on a
+  // bare 180 ms timer raced the 180 ms CSS animation and produced a one-frame
+  // white flash on slower WebView2 windows.
+  const onAnimationEnd = (event) => {
+    if (event.target !== modal) return;
+    modal.removeEventListener("animationend", onAnimationEnd);
+    delete modal._settingsCloseAnimationEnd;
+    if (settingsModalCloseTimer !== null) {
+      window.clearTimeout(settingsModalCloseTimer);
+      settingsModalCloseTimer = null;
+    }
+    finishSettingsModalClose(modal);
+  };
+  modal._settingsCloseAnimationEnd = onAnimationEnd;
+  modal.addEventListener("animationend", onAnimationEnd);
   settingsModalCloseTimer = window.setTimeout(() => {
     settingsModalCloseTimer = null;
-    finishSettingsModalClose(modal);
-  }, 180);
+    onAnimationEnd({ target: modal });
+  }, 260);
 }
 
 function setResultDetailsOpen(panel, button, label, shouldOpen) {
@@ -6470,6 +6499,14 @@ async function skipUpdateVersion() {
   }
 }
 
+function setManualUpdateFilename(name) {
+  const label = $("update-manual-filename");
+  if (!label) return;
+  const text = String(name || "").trim();
+  label.textContent = text || "未选择文件";
+  label.title = text;
+}
+
 function resetManualUpdateSelection() {
   updateManualToken = "";
   updateManualKind = "";
@@ -6678,7 +6715,11 @@ function initUpdateUI() {
     try { sessionStorage.setItem("pla-update-banner-dismissed", String(updateCheckData?.latest_version || "")); } catch (_) {}
     setUpdateBannerVisible(false);
   });
-  $("update-manual-file")?.addEventListener("change", resetManualUpdateSelection);
+  $("update-manual-pick")?.addEventListener("click", () => $("update-manual-file")?.click());
+  $("update-manual-file")?.addEventListener("change", event => {
+    resetManualUpdateSelection();
+    setManualUpdateFilename(event.target?.files?.[0]?.name || "");
+  });
   $("update-manual-validate")?.addEventListener("click", validateManualUpdate);
   $("update-manual-install")?.addEventListener("click", installManualUpdate);
   $("cleanup-refresh")?.addEventListener("click", loadCleanupTargets);
