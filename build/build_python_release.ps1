@@ -79,7 +79,7 @@ Dim shell, folder
 Set shell = CreateObject("WScript.Shell")
 folder = CreateObject("Scripting.FileSystemObject").GetParentFolderName(WScript.ScriptFullName)
 shell.CurrentDirectory = folder
-shell.Run """" & folder & "\python\pythonw.exe"" """ & folder & "\app.py""", 0, False
+shell.Run """" & folder & "\python\pythonw.exe"" """ & folder & "\app.py""", 1, False
 "@ | Set-Content -Encoding ascii (Join-Path $Stage "Start-PLA.vbs")
 
 New-Item -ItemType Directory -Path $ReleaseDir -Force | Out-Null

@@ -15,6 +15,7 @@ build/.work-*/
 build/.helper-dist/
 build/portable-test/
 dist/
+dist-python/
 release/
 *.log
 
