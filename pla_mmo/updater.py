@@ -738,6 +738,7 @@ class UpdateService:
             ],
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             close_fds=True,
+            cwd=str(Path(tempfile.gettempdir())),
         )
         self._exit_soon()
 
@@ -764,6 +765,7 @@ class UpdateService:
             ],
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             close_fds=True,
+            cwd=str(Path(tempfile.gettempdir())),
         )
         self._exit_soon()
 
@@ -910,6 +912,7 @@ def _portable_helper_script(*, target: Path, staging: Path, pythonw: Path, app_p
     log_q = _ps_quote(str(log_path))
     old_q = _ps_quote(str(target) + ".update-old-" + uuid.uuid4().hex[:8])
     return f"""$ErrorActionPreference = 'Stop'
+Set-Location -LiteralPath $env:TEMP
 $target = {target_q}
 $staging = {staging_q}
 $pythonw = {pythonw_q}
@@ -931,7 +934,7 @@ try {{
         }}
     }}
     Move-Item -LiteralPath $staging -Destination $target
-    Start-Process -FilePath $pythonw -ArgumentList ('"' + $target + '\\app.py"') -WorkingDirectory $target
+    Start-Process -FilePath (Join-Path $target 'python\\pythonw.exe') -ArgumentList ('"' + $target + '\\app.py"') -WorkingDirectory $target
     Write-Log 'portable update installed and restarted'
     Start-Sleep -Seconds 5
     Remove-Item -LiteralPath $old -Recurse -Force -ErrorAction SilentlyContinue
@@ -949,6 +952,7 @@ def _setup_helper_script(*, target: Path, setup: Path, app_pid: int, log_path: P
     setup_q = _ps_quote(str(setup))
     log_q = _ps_quote(str(log_path))
     return f"""$ErrorActionPreference = 'Stop'
+Set-Location -LiteralPath $env:TEMP
 $target = {target_q}
 $setup = {setup_q}
 $log = {log_q}
