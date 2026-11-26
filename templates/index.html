@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>洗翠闪光路径档案 · PLA MMO Path Finder · 君粒</title>
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.5') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.5') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.5') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.5') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.5-multi19') }}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.6') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.6') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.6') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.6') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.6-multi20') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='update.css', v='0.9.6') }}">
 </head>
 <body data-theme="{{ appearance_theme|default('forest') }}"
       data-appearance-saved="{{ '1' if appearance_preferences_saved|default(false) else '0' }}"
@@ -78,6 +79,18 @@
           <button id="fix-engine-banner" class="btn btn-primary" type="button">修复本地引擎</button>
           <button id="copy-diagnostics-banner" class="btn btn-secondary" type="button">复制诊断报告</button>
           <button class="btn btn-ghost" type="button" data-open-settings data-settings-target="resources">查看设置</button>
+        </div>
+      </section>
+
+      <section id="update-banner" class="update-banner hidden" role="status" aria-live="polite">
+        <div class="update-banner-copy">
+          <span class="update-banner-kicker">发现新版本</span>
+          <strong id="update-banner-version">v{{ app_version }}</strong>
+          <p>可以查看更新内容后前往 GitHub 下载，或在设置中心手动选择更新包。</p>
+        </div>
+        <div class="update-banner-actions">
+          <button id="update-banner-open" class="btn btn-primary" type="button">查看更新</button>
+          <button id="update-banner-later" class="btn btn-ghost" type="button">稍后</button>
         </div>
       </section>
 
@@ -498,6 +511,7 @@
             <button class="settings-tab-button active" type="button" role="tab" id="settings-tab-button-appearance" data-settings-tab="appearance" aria-controls="settings-tab-appearance" aria-selected="true" tabindex="0">外观主题</button>
             <button class="settings-tab-button" type="button" role="tab" id="settings-tab-button-pokemon" data-settings-tab="pokemon" aria-controls="settings-tab-pokemon" aria-selected="false" tabindex="-1">宝可梦设置</button>
             <button class="settings-tab-button" type="button" role="tab" id="settings-tab-button-resources" data-settings-tab="resources" aria-controls="settings-tab-resources" aria-selected="false" tabindex="-1">资源管理</button>
+            <button class="settings-tab-button" type="button" role="tab" id="settings-tab-button-updates" data-settings-tab="updates" aria-controls="settings-tab-updates" aria-selected="false" tabindex="-1">更新与维护</button>
             <button class="settings-tab-button" type="button" role="tab" id="settings-tab-button-help" data-settings-tab="help" aria-controls="settings-tab-help" aria-selected="false" tabindex="-1">帮助与诊断</button>
           </nav>
 
@@ -740,6 +754,73 @@
           </div>
                 </div>
               </details>
+            </section>
+
+            <section class="settings-tab-panel" id="settings-tab-updates" role="tabpanel" aria-labelledby="settings-tab-button-updates" data-settings-panel="updates" hidden>
+              <section class="panel update-panel" aria-labelledby="update-panel-title">
+                <div class="settings-block-heading">
+                  <h3 id="update-panel-title">检查更新</h3>
+                  <span id="update-mode-pill" class="status-pill status-muted">便携版</span>
+                </div>
+                <div class="update-version-row">
+                  <span>当前版本 <strong id="update-current-version">v{{ app_version }}</strong></span>
+                  <span id="update-last-checked" class="muted">尚未检查</span>
+                </div>
+                <p class="field-note">更新会替换程序文件，但<strong>不会删除 cache、宝可梦图片、地图标注或你的设置</strong>。便携版使用 ZIP，安装版使用 Setup.exe；更新前请先关闭正在运行的计算。</p>
+                <div class="button-row">
+                  <button id="update-check" class="btn btn-primary" type="button">检查更新</button>
+                  <button id="update-open-release" class="btn btn-secondary" type="button">打开发布页</button>
+                  <button id="update-open-folder" class="btn btn-ghost" type="button">打开更新缓存</button>
+                </div>
+                <div id="update-status" class="update-status" aria-live="polite"></div>
+                <div id="update-available" class="update-available hidden">
+                  <div class="update-available-head">
+                    <strong id="update-latest-version">v0.0.0</strong>
+                    <span class="status-pill status-success">有新版本</span>
+                  </div>
+                  <pre id="update-notes" class="update-notes"></pre>
+                  <div class="button-row">
+                    <button id="update-download" class="btn btn-primary" type="button">下载更新包</button>
+                    <button id="update-install" class="btn btn-secondary hidden" type="button">退出并安装</button>
+                    <button id="update-skip" class="btn btn-ghost" type="button">跳过此版本</button>
+                  </div>
+                  <div id="update-progress" class="update-progress hidden" aria-live="polite">
+                    <div class="update-progress-head"><span id="update-progress-label">准备下载…</span><strong id="update-progress-percent">0%</strong></div>
+                    <div class="update-progress-track"><div id="update-progress-bar" class="update-progress-bar" style="width:0%"></div></div>
+                    <p id="update-progress-detail" class="field-note"></p>
+                  </div>
+                </div>
+                <div id="update-error" class="update-error hidden" role="alert"></div>
+              </section>
+
+              <section class="panel update-panel" aria-labelledby="update-manual-title">
+                <div class="settings-block-heading">
+                  <h3 id="update-manual-title">手动更新</h3>
+                  <span class="muted">网络不通时使用</span>
+                </div>
+                <p class="field-note">如果自动检查或下载失败，请打开项目 Release 页面，下载 <strong>portable.zip</strong> 或 <strong>Setup.exe</strong>，再在这里选择文件。程序会校验目录结构；便携 ZIP 还会核对版本，避免误装旧版本。</p>
+                <div class="button-row">
+                  <input id="update-manual-file" class="update-file-input" type="file" accept=".zip,.exe">
+                  <button id="update-manual-validate" class="btn btn-secondary" type="button">校验所选文件</button>
+                  <button id="update-manual-install" class="btn btn-primary" type="button" disabled>退出并安装</button>
+                </div>
+                <div id="update-manual-info" class="update-manual-info"></div>
+              </section>
+
+              <section class="panel update-panel" aria-labelledby="cleanup-title">
+                <div class="settings-block-heading">
+                  <h3 id="cleanup-title">清理本地数据</h3>
+                  <span class="muted">卸载前可逐项确认</span>
+                </div>
+                <p class="field-note">这里列出程序会写入的所有本地位置。更新不会删除它们；只有你在这里勾选并确认后才会删除。默认只勾选安全的临时文件，设置、地图标注和自定义图片默认不勾选。</p>
+                <div id="cleanup-list" class="cleanup-list"></div>
+                <div class="button-row">
+                  <label class="cleanup-select-all"><input id="cleanup-select-all" type="checkbox"> 全选</label>
+                  <button id="cleanup-refresh" class="btn btn-secondary" type="button">刷新列表</button>
+                  <button id="cleanup-run" class="btn btn-danger" type="button">清理所选数据</button>
+                </div>
+                <div id="cleanup-result" class="cleanup-result" aria-live="polite"></div>
+              </section>
             </section>
 
             <section class="settings-tab-panel settings-help-panel" id="settings-tab-help" role="tabpanel" aria-labelledby="settings-tab-button-help" data-settings-panel="help" hidden>
@@ -1040,8 +1121,8 @@
       <div id="result-detail-body" class="result-detail-body"></div>
     </section>
   </div>
-  <script src="{{ url_for('static', filename='result_view.js', v='0.9.5') }}"></script>
-  <script src="{{ url_for('static', filename='app.js', v='0.9.5-multi19') }}"></script>
+  <script src="{{ url_for('static', filename='result_view.js', v='0.9.6') }}"></script>
+  <script src="{{ url_for('static', filename='app.js', v='0.9.6-multi20') }}"></script>
 </body>
 </html>
 

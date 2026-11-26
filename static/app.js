@@ -884,7 +884,7 @@ function openLinkSeedResources() {
 }
 
 function activateSettingsTab(tabName, focus = false) {
-  const allowed = new Set(["appearance", "pokemon", "resources", "help"]);
+  const allowed = new Set(["appearance", "pokemon", "resources", "updates", "help"]);
   const target = allowed.has(tabName) ? tabName : "appearance";
   document.querySelectorAll("[data-settings-tab]").forEach(button => {
     const active = button.dataset.settingsTab === target;
@@ -903,6 +903,9 @@ function activateSettingsTab(tabName, focus = false) {
   if (target === "resources") {
     loadResources();
     window.setTimeout(() => refreshBoardStatus(true), 250);
+  }
+  if (target === "updates") {
+    loadUpdatePanel();
   }
 }
 
@@ -6184,6 +6187,511 @@ setupMapZoomPan("multi-map"); // 多只生成点地图（同一套滚轮/拖拽/
   }, true); // 捕获阶段，优先于各弹窗自己的 ESC 处理
 })();
 
+/* -------------------------------------------------------------------------
+ * Update centre: GitHub release check, download/manual package, cleanup.
+ * All requests return JSON even for expected failures, so they intentionally
+ * bypass the global api() helper which throws away hint/detail fields.
+ * ---------------------------------------------------------------------- */
+let updateSnapshot = null;
+let updateCheckData = null;
+let updateDownloadState = null;
+let updateInstallToken = "";
+let updateInstallKind = "";
+let updateManualToken = "";
+let updateManualKind = "";
+let updateManualVersion = "";
+let updatePollTimer = null;
+let cleanupTargets = [];
+let updateBannerDismissed = false;
+
+async function updateRequest(url, options = {}) {
+  const { timeoutMs = 30000, ...requestOptions } = options;
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...requestOptions, signal: controller.signal });
+    let data;
+    try { data = await response.json(); }
+    catch { throw new Error(`服务器响应不是 JSON（HTTP ${response.status}）`); }
+    if (!data || typeof data !== "object") throw new Error("服务器返回了无效响应。");
+    return data;
+  } catch (error) {
+    if (error?.name === "AbortError") throw new Error(`请求超时（${Math.ceil(timeoutMs / 1000)} 秒）`);
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
+function updateErrorMarkup(data) {
+  const message = data?.error || "操作失败。";
+  const hint = data?.hint || "";
+  return `${escapeUpdateText(message)}${hint ? `<span class="update-error-hint">${escapeUpdateText(hint)}</span>` : ""}`;
+}
+
+function escapeUpdateText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[ch]));
+}
+
+function setUpdateError(message, hint = "") {
+  const node = $("update-error");
+  if (!node) return;
+  if (!message) {
+    node.classList.add("hidden");
+    node.textContent = "";
+    return;
+  }
+  node.innerHTML = `<strong>${escapeUpdateText(message)}</strong>${hint ? `<span class="update-error-hint">${escapeUpdateText(hint)}</span>` : ""}`;
+  node.classList.remove("hidden");
+}
+
+function updateModeLabel(mode) {
+  return mode === "installed" ? "安装版 · Setup" : "便携版 · ZIP";
+}
+
+function updateCheckedLabel(value) {
+  if (!value) return "尚未检查";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "最近检查时间未知";
+  return `最近检查：${date.toLocaleString("zh-CN", { hour12: false })}`;
+}
+
+function setUpdateBannerVisible(visible, version = "") {
+  const banner = $("update-banner");
+  if (!banner) return;
+  banner.classList.toggle("hidden", !visible);
+  if (visible && $("update-banner-version")) {
+    $("update-banner-version").textContent = version ? `v${String(version).replace(/^v/i, "")}` : "发现新版本";
+  }
+}
+
+function renderUpdateCheck(data) {
+  updateCheckData = data;
+  if (!data) return;
+  const mode = data.mode || "portable";
+  if ($("update-mode-pill")) $("update-mode-pill").textContent = updateModeLabel(mode);
+  if ($("update-current-version")) $("update-current-version").textContent = `v${data.current_version || ""}`;
+  if ($("update-last-checked")) $("update-last-checked").textContent = updateCheckedLabel(data.checked_at);
+
+  const status = $("update-status");
+  if (status) {
+    status.classList.remove("success", "error");
+    if (!data.ok) {
+      status.textContent = "检查更新失败。";
+      status.classList.add("error");
+    } else if (data.update_available) {
+      const asset = data.asset || {};
+      const size = asset.size ? ` · ${formatResourceSize(asset.size)}` : "";
+      status.textContent = data.skipped
+        ? `发现 v${data.latest_version}，但你已跳过此版本。`
+        : `发现新版本 v${data.latest_version}${size}。`;
+      status.classList.add("success");
+    } else {
+      status.textContent = "当前已经是最新版本。";
+      status.classList.add("success");
+    }
+  }
+
+  const available = $("update-available");
+  const hasUpdate = Boolean(data.ok && data.update_available);
+  if (available) available.classList.toggle("hidden", !hasUpdate);
+  if (hasUpdate) {
+    if ($("update-latest-version")) $("update-latest-version").textContent = `v${data.latest_version}`;
+    if ($("update-notes")) $("update-notes").textContent = data.notes || "该版本没有提供额外更新说明。";
+    const skip = $("update-skip");
+    if (skip) skip.textContent = data.skipped ? "恢复更新提示" : "跳过此版本";
+    const download = $("update-download");
+    if (download) download.classList.toggle("hidden", Boolean(data.skipped));
+    if (data.skipped) {
+      setUpdateBannerVisible(false);
+    } else {
+      let dismissed = "";
+      try { dismissed = sessionStorage.getItem("pla-update-banner-dismissed") || ""; } catch (_) {}
+      updateBannerDismissed = dismissed === String(data.latest_version);
+      setUpdateBannerVisible(!updateBannerDismissed, data.latest_version);
+    }
+  } else {
+    setUpdateBannerVisible(false);
+  }
+
+  if (!data.ok) {
+    setUpdateError(data.error || "检查更新失败。", data.hint || "");
+  } else {
+    setUpdateError("");
+  }
+}
+
+function renderUpdateDownload(download) {
+  updateDownloadState = download || null;
+  const box = $("update-progress");
+  const button = $("update-download");
+  const install = $("update-install");
+  if (!box) return;
+  if (!download || download.state === "idle") {
+    box.classList.add("hidden");
+    if (button) { button.disabled = false; button.textContent = "下载更新包"; }
+    return;
+  }
+  const state = String(download.state || "");
+  const active = state === "starting" || state === "downloading" || state === "verifying";
+  const percent = Math.max(0, Math.min(100, Number(download.percent) || 0));
+  box.classList.remove("hidden");
+  if ($("update-progress-label")) $("update-progress-label").textContent = download.message || "准备下载…";
+  if ($("update-progress-percent")) $("update-progress-percent").textContent = `${percent}%`;
+  if ($("update-progress-bar")) $("update-progress-bar").style.width = `${percent}%`;
+  if ($("update-progress-detail")) {
+    const total = Number(download.total) || 0;
+    const got = Number(download.downloaded) || 0;
+    $("update-progress-detail").textContent = total
+      ? `${formatResourceSize(got)} / ${formatResourceSize(total)}${download.error ? ` · ${download.error}` : ""}`
+      : (download.error || "更新包会下载到 cache/updates，校验后才会启用。");
+  }
+  if (button) {
+    button.disabled = active;
+    button.textContent = active ? "正在下载…" : (state === "success" ? "重新下载" : "下载更新包");
+  }
+  if (install) {
+    const ready = state === "success" && download.path;
+    install.classList.toggle("hidden", !ready);
+    if (ready) {
+      updateInstallToken = String(download.path).split(/[\\/]/).pop() || "";
+      updateInstallKind = download.kind || (updateCheckData?.mode === "installed" ? "setup" : "portable");
+    }
+  }
+  if (state === "failed") {
+    setUpdateError(download.error || "下载失败。", download.hint || "");
+  }
+}
+
+async function checkForUpdates(force = false, auto = false) {
+  const button = $("update-check");
+  if (button) { button.disabled = true; button.textContent = "检查中…"; }
+  try {
+    const data = await updateRequest(`/api/update/check?force=${force ? 1 : 0}&auto=${auto ? 1 : 0}`, { timeoutMs: 30000 });
+    renderUpdateCheck(data);
+    if (!auto && data.ok) {
+      showToast(data.update_available ? `发现新版本 v${data.latest_version}` : "当前已是最新版本。");
+    }
+  } catch (error) {
+    if (!auto) {
+      setUpdateError(`检查更新失败：${error.message}`, "请检查网络或代理后重试；也可以直接打开发布页手动下载。");
+      showToast(`检查更新失败：${error.message}`);
+    }
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "检查更新"; }
+  }
+}
+
+async function startUpdateDownload() {
+  setUpdateError("");
+  try {
+    const data = await updateRequest("/api/update/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+      timeoutMs: 30000,
+    });
+    if (!data.ok) {
+      setUpdateError(data.error || "无法开始下载。", data.hint || "");
+      return;
+    }
+    renderUpdateDownload(data.download || { state: "starting", message: "准备下载更新…", percent: 0 });
+    pollUpdateDownload();
+  } catch (error) {
+    setUpdateError(`无法开始下载：${error.message}`, "请检查网络或代理，也可以手动下载更新包。");
+  }
+}
+
+function pollUpdateDownload() {
+  if (updatePollTimer !== null) window.clearTimeout(updatePollTimer);
+  const tick = async () => {
+    updatePollTimer = null;
+    try {
+      const data = await updateRequest("/api/update/download/status", { timeoutMs: 15000 });
+      if (!data.ok) throw new Error(data.error || "读取下载进度失败。");
+      renderUpdateDownload(data.download);
+      const state = String(data.download?.state || "");
+      if (state === "success") {
+        showToast("更新包已下载并通过校验。");
+        return;
+      }
+      if (state === "failed") return;
+      updatePollTimer = window.setTimeout(tick, 700);
+    } catch (error) {
+      setUpdateError(`读取下载进度失败：${error.message}`, "");
+    }
+  };
+  updatePollTimer = window.setTimeout(tick, 300);
+}
+
+async function installDownloadedUpdate() {
+  const token = updateInstallToken;
+  if (!token) {
+    setUpdateError("没有可安装的更新包，请先下载或选择文件。", "");
+    return;
+  }
+  if (!window.confirm("安装更新会关闭当前程序，完成后自动重新启动。cache、设置和地图标注会保留。继续吗？")) return;
+  const install = $("update-install");
+  if (install) { install.disabled = true; install.textContent = "正在准备退出…"; }
+  try {
+    const data = await updateRequest("/api/update/install", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, kind: updateInstallKind }),
+      timeoutMs: 20000,
+    });
+    if (!data.ok) throw new Error(data.error || "无法安装更新。");
+    if ($("update-status")) $("update-status").textContent = "程序即将退出，更新完成后会自动重新启动…";
+    showToast("程序即将退出并完成更新。", "ok");
+  } catch (error) {
+    setUpdateError(`无法安装更新：${error.message}`, "请关闭占用程序文件的窗口后重试；也可以手动运行下载的 Setup 或解压 portable ZIP。");
+    if (install) { install.disabled = false; install.textContent = "退出并安装"; }
+  }
+}
+
+async function skipUpdateVersion() {
+  if (!updateCheckData?.latest_version) return;
+  const restoring = Boolean(updateCheckData.skipped);
+  try {
+    const data = await updateRequest("/api/update/skip", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ version: restoring ? "" : updateCheckData.latest_version }),
+      timeoutMs: 15000,
+    });
+    if (!data.ok) throw new Error(data.error || "无法保存跳过记录。");
+    updateCheckData = { ...updateCheckData, skipped: !restoring };
+    renderUpdateCheck(updateCheckData);
+    showToast(restoring ? "已恢复该版本的更新提示。" : "已跳过此版本，可在更新页恢复。", "ok");
+  } catch (error) {
+    setUpdateError(`保存跳过记录失败：${error.message}`, "");
+  }
+}
+
+function resetManualUpdateSelection() {
+  updateManualToken = "";
+  updateManualKind = "";
+  updateManualVersion = "";
+  const install = $("update-manual-install");
+  if (install) install.disabled = true;
+  const info = $("update-manual-info");
+  if (info) { info.textContent = ""; info.className = "update-manual-info"; }
+}
+
+async function validateManualUpdate() {
+  const input = $("update-manual-file");
+  const file = input?.files?.[0];
+  if (!file) {
+    setUpdateError("请先选择一个 portable ZIP 或 Setup.exe。", "");
+    return;
+  }
+  resetManualUpdateSelection();
+  const button = $("update-manual-validate");
+  if (button) { button.disabled = true; button.textContent = "校验中…"; }
+  try {
+    const form = new FormData();
+    form.append("file", file, file.name);
+    const response = await fetch("/api/update/manual", { method: "POST", body: form });
+    let data;
+    try { data = await response.json(); } catch { throw new Error(`服务器响应不是 JSON（HTTP ${response.status}）`); }
+    if (!data.ok) {
+      const info = $("update-manual-info");
+      if (info) {
+        info.className = "update-manual-info bad";
+        info.textContent = `${data.error || "校验失败。"}${data.hint ? ` ${data.hint}` : ""}`;
+      }
+      setUpdateError(data.error || "更新包校验失败。", data.hint || "");
+      return;
+    }
+    updateManualToken = data.token || "";
+    updateManualKind = data.kind || (file.name.toLowerCase().endsWith(".exe") ? "setup" : "portable");
+    updateManualVersion = data.version || "";
+    const install = $("update-manual-install");
+    if (install) install.disabled = !updateManualToken;
+    const info = $("update-manual-info");
+    if (info) {
+      info.className = "update-manual-info ok";
+      info.textContent = data.version
+        ? `${data.message || "校验通过。"} 版本：${data.version}`
+        : (data.message || "已选择安装包。");
+    }
+    setUpdateError("");
+    showToast("更新包校验通过。", "ok");
+  } catch (error) {
+    setUpdateError(`更新包上传失败：${error.message}`, "请确认文件不超过 512 MB，且磁盘空间充足。");
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "校验所选文件"; }
+  }
+}
+
+async function installManualUpdate() {
+  if (!updateManualToken) {
+    setUpdateError("请先选择并校验更新包。", "");
+    return;
+  }
+  const label = updateManualVersion ? `v${updateManualVersion}` : "所选安装包";
+  if (!window.confirm(`将使用${label}覆盖当前程序，完成后自动重新启动。cache、设置和地图标注会保留。继续吗？`)) return;
+  const install = $("update-manual-install");
+  if (install) { install.disabled = true; install.textContent = "正在准备退出…"; }
+  try {
+    const data = await updateRequest("/api/update/install", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: updateManualToken, kind: updateManualKind }),
+      timeoutMs: 20000,
+    });
+    if (!data.ok) throw new Error(data.error || "无法安装更新。");
+    showToast("程序即将退出并完成更新。", "ok");
+  } catch (error) {
+    setUpdateError(`无法安装更新：${error.message}`, "请关闭占用程序文件的窗口后重试。");
+    if (install) { install.disabled = false; install.textContent = "退出并安装"; }
+  }
+}
+
+function renderCleanupTargets() {
+  const list = $("cleanup-list");
+  if (!list) return;
+  list.textContent = "";
+  for (const item of cleanupTargets) {
+    const label = document.createElement("label");
+    label.className = `cleanup-item${item.exists ? "" : " missing"}`;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.dataset.cleanupKey = item.key;
+    checkbox.checked = Boolean(item.default && item.exists);
+    const copy = document.createElement("span");
+    copy.className = "cleanup-item-copy";
+    const title = document.createElement("strong");
+    title.textContent = item.label;
+    const description = document.createElement("p");
+    description.textContent = item.description || "";
+    const path = document.createElement("code");
+    path.textContent = item.path || "";
+    copy.append(title, description, path);
+    const size = document.createElement("span");
+    size.className = "cleanup-item-size";
+    size.textContent = item.exists ? formatResourceSize(item.size || 0) : "不存在";
+    label.append(checkbox, copy, size);
+    list.appendChild(label);
+  }
+  updateCleanupSelectAll();
+}
+
+function updateCleanupSelectAll() {
+  const boxes = [...document.querySelectorAll("[data-cleanup-key]")];
+  const all = $("cleanup-select-all");
+  if (all) all.checked = boxes.length > 0 && boxes.every(box => box.checked);
+}
+
+async function loadCleanupTargets() {
+  try {
+    const data = await updateRequest("/api/update/cleanup", { timeoutMs: 20000 });
+    if (!data.ok) throw new Error(data.error || "无法读取清理列表。");
+    cleanupTargets = Array.isArray(data.targets) ? data.targets : [];
+    renderCleanupTargets();
+  } catch (error) {
+    const list = $("cleanup-list");
+    if (list) list.textContent = `读取清理列表失败：${error.message}`;
+  }
+}
+
+async function runCleanup() {
+  const keys = [...document.querySelectorAll("[data-cleanup-key]:checked")].map(box => box.dataset.cleanupKey);
+  if (!keys.length) {
+    showToast("请至少勾选一项要清理的数据。", "error");
+    return;
+  }
+  const risky = keys.filter(key => ["cache_all", "custom_images", "map_annotations", "settings"].includes(key));
+  const message = risky.length
+    ? "你选择了会删除资源、地图标注或设置的项目，删除后可能无法恢复。确定继续吗？"
+    : "将删除勾选的临时文件、更新包和日志。确定继续吗？";
+  if (!window.confirm(message)) return;
+  const button = $("cleanup-run");
+  if (button) { button.disabled = true; button.textContent = "清理中…"; }
+  const result = $("cleanup-result");
+  try {
+    const data = await updateRequest("/api/update/cleanup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keys }),
+      timeoutMs: 60000,
+    });
+    if (result) {
+      result.className = `cleanup-result ${data.ok ? "ok" : "bad"}`;
+      result.textContent = data.ok
+        ? `已清理 ${keys.length} 项，释放 ${formatResourceSize(data.freed_bytes || 0)}。`
+        : `部分项目未能删除：${(data.errors || []).join("；") || "未知错误"}`;
+    }
+    if (data.ok) showToast(`清理完成，释放 ${formatResourceSize(data.freed_bytes || 0)}。`, "ok");
+    await loadCleanupTargets();
+  } catch (error) {
+    if (result) { result.className = "cleanup-result bad"; result.textContent = `清理失败：${error.message}`; }
+    showToast(`清理失败：${error.message}`);
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "清理所选数据"; }
+  }
+}
+
+async function loadUpdatePanel() {
+  try {
+    const snapshot = await updateRequest("/api/update/status", { timeoutMs: 15000 });
+    if (snapshot?.ok) {
+      updateSnapshot = snapshot;
+      if (snapshot.check) renderUpdateCheck(snapshot.check);
+      renderUpdateDownload(snapshot.download);
+      if (snapshot.manual?.token) {
+        updateManualToken = snapshot.manual.token;
+        updateManualKind = snapshot.manual.kind || "portable";
+        updateManualVersion = snapshot.manual.version || "";
+        const install = $("update-manual-install");
+        if (install) install.disabled = false;
+      }
+    }
+  } catch (_) {}
+  await loadCleanupTargets();
+}
+
+function openUpdateSettings() {
+  openSettingsModal();
+  activateSettingsTab("updates");
+  loadUpdatePanel();
+}
+
+function initUpdateUI() {
+  $("update-check")?.addEventListener("click", () => checkForUpdates(true, false));
+  $("update-download")?.addEventListener("click", startUpdateDownload);
+  $("update-install")?.addEventListener("click", installDownloadedUpdate);
+  $("update-skip")?.addEventListener("click", skipUpdateVersion);
+  $("update-open-release")?.addEventListener("click", async () => {
+    try { await updateRequest("/api/update/open-release", { method: "POST", timeoutMs: 10000 }); }
+    catch (_) { window.open("https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/latest", "_blank", "noopener"); }
+  });
+  $("update-open-folder")?.addEventListener("click", async () => {
+    try { await updateRequest("/api/update/open-folder", { method: "POST", timeoutMs: 15000 }); }
+    catch (error) { setUpdateError(`无法打开更新目录：${error.message}`, ""); }
+  });
+  $("update-banner-open")?.addEventListener("click", openUpdateSettings);
+  $("update-banner-later")?.addEventListener("click", () => {
+    updateBannerDismissed = true;
+    try { sessionStorage.setItem("pla-update-banner-dismissed", String(updateCheckData?.latest_version || "")); } catch (_) {}
+    setUpdateBannerVisible(false);
+  });
+  $("update-manual-file")?.addEventListener("change", resetManualUpdateSelection);
+  $("update-manual-validate")?.addEventListener("click", validateManualUpdate);
+  $("update-manual-install")?.addEventListener("click", installManualUpdate);
+  $("cleanup-refresh")?.addEventListener("click", loadCleanupTargets);
+  $("cleanup-run")?.addEventListener("click", runCleanup);
+  $("cleanup-select-all")?.addEventListener("change", event => {
+    document.querySelectorAll("[data-cleanup-key]").forEach(box => { box.checked = event.target.checked; });
+  });
+  $("cleanup-list")?.addEventListener("change", event => {
+    if (event.target?.dataset?.cleanupKey) updateCleanupSelectAll();
+  });
+  checkForUpdates(false, true).catch(() => {});
+}
+
 (async function init() {
   // A setup error must not prevent the independent data requests from running.
   try {
@@ -6198,6 +6706,11 @@ setupMapZoomPan("multi-map"); // 多只生成点地图（同一套滚轮/拖拽/
   } catch (error) {
     console.error("群体类型初始化失败", error);
     showToast(`群体类型初始化失败：${error.message}`);
+  }
+  try {
+    initUpdateUI();
+  } catch (error) {
+    console.error("更新中心初始化失败", error);
   }
 
   // Run startup requests independently. A slow settings/engine endpoint must
@@ -6235,10 +6748,10 @@ setupMapZoomPan("multi-map"); // 多只生成点地图（同一套滚轮/拖拽/
     if (params.get("quick") === "1") {
       window.setTimeout(() => openLinkQuickPanel(), 350);
     }
-    if (params.get("settings") === "resources") {
+    if (params.get("settings") === "resources" || params.get("settings") === "updates") {
       window.setTimeout(() => {
         openSettingsModal();
-        activateSettingsTab("resources");
+        activateSettingsTab(params.get("settings"));
       }, 250);
     }
   } catch (_) {}

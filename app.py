@@ -31,8 +31,9 @@ from pla_mmo.settings import SettingsStore, get_data_dir
 from pla_mmo.paths import get_log_dir, get_project_root
 from pla_mmo.pokemon_assets import PokemonAssetManager
 from pla_mmo.launcher import choose_local_port
+from pla_mmo.updater import UpdateError, UpdateService
 
-APP_VERSION = "0.9.5"
+APP_VERSION = "0.9.6"
 AUTHOR_NAME = "君粒"
 
 PROJECT_ROOT = get_project_root()
@@ -74,7 +75,9 @@ def create_app(test_config: dict | None = None) -> Flask:
     app = Flask(__name__)
     app.config.update(
         JSON_AS_ASCII=False,
-        MAX_CONTENT_LENGTH=2 * 1024 * 1024,
+        # Manual update archives can be around 56 MB (portable) or 35 MB
+        # (Setup); keep a generous ceiling for the multipart upload.
+        MAX_CONTENT_LENGTH=512 * 1024 * 1024,
     )
     if test_config:
         app.config.update(test_config)
@@ -93,6 +96,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     spawn_maps = SpawnMapStore()
     resource_manager = ResourceManager(PROJECT_ROOT, seed_link, pokemon_assets, local_engine.status)
     board_flasher = BoardFlasher(PROJECT_ROOT, seed_link)
+    update_service = UpdateService(PROJECT_ROOT, APP_VERSION, data_dir, cache_root)
 
     app.extensions["pla_settings_store"] = settings_store
     app.extensions["pla_seed_manager"] = seed_manager
@@ -102,6 +106,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.extensions["pla_seed_link"] = seed_link
     app.extensions["pla_resource_manager"] = resource_manager
     app.extensions["pla_spawn_maps"] = spawn_maps
+    app.extensions["pla_update_service"] = update_service
 
     # Images used to live in %LOCALAPPDATA%; copy them into the tool cache once
     # so users can back up everything by copying a single folder. Do it in the
@@ -308,6 +313,109 @@ def create_app(test_config: dict | None = None) -> Flask:
         result = resource_manager.open_cache()
         status = 200 if result.get("ok") else 400
         return jsonify(result), status
+
+    @app.errorhandler(413)
+    def upload_too_large(_error):
+        return jsonify({
+            "ok": False,
+            "error": "上传文件太大。",
+            "hint": "更新包上限为 512 MB；请选择便携 ZIP 或 Setup.exe。",
+        }), 413
+
+    @app.get("/api/update/check")
+    def update_check():
+        force = str(request.args.get("force") or "").lower() in {"1", "true", "yes"}
+        auto = str(request.args.get("auto") or "").lower() in {"1", "true", "yes"}
+        return jsonify(update_service.check(force=force, auto=auto))
+
+    @app.get("/api/update/status")
+    def update_status():
+        return jsonify(update_service.snapshot())
+
+    @app.post("/api/update/skip")
+    def update_skip():
+        body = request.get_json(silent=True) or {}
+        return jsonify(update_service.skip(str(body.get("version") or "")))
+
+    @app.post("/api/update/download")
+    def update_download():
+        body = request.get_json(silent=True) or {}
+        kind = str(body.get("kind") or "").strip() or None
+        result = update_service.start_download(kind)
+        return jsonify(result)
+
+    @app.get("/api/update/download/status")
+    def update_download_status():
+        return jsonify({"ok": True, "download": update_service.snapshot()["download"]})
+
+    @app.post("/api/update/manual")
+    def update_manual():
+        storage = request.files.get("file")
+        if storage is None or not storage.filename:
+            return json_error("请选择一个更新包文件。", 400)
+        try:
+            result = update_service.stage_manual(storage)
+        except UpdateError as exc:
+            return jsonify({
+                "ok": False,
+                "error": str(exc),
+                "hint": exc.hint,
+                "detail": exc.detail,
+            }), 400
+        return jsonify(result)
+
+    @app.post("/api/update/install")
+    def update_install():
+        body = request.get_json(silent=True) or {}
+        try:
+            result = update_service.install(
+                str(body.get("token") or ""),
+                str(body.get("kind") or ""),
+            )
+        except UpdateError as exc:
+            return jsonify({
+                "ok": False,
+                "error": str(exc),
+                "hint": exc.hint,
+                "detail": exc.detail,
+            }), 400
+        return jsonify(result)
+
+    @app.post("/api/update/open-release")
+    def update_open_release():
+        try:
+            webbrowser.open(update_service.snapshot().get("check", {}).get("release_url") or "https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/latest")
+        except Exception as exc:
+            return json_error(f"无法打开浏览器：{exc}", 500)
+        return jsonify({"ok": True})
+
+    @app.post("/api/update/open-folder")
+    def update_open_folder():
+        folder = update_service.update_dir
+        folder.mkdir(parents=True, exist_ok=True)
+        try:
+            os.startfile(str(folder))  # type: ignore[attr-defined]
+        except Exception as exc:
+            return json_error(f"无法打开更新目录：{exc}", 500)
+        return jsonify({"ok": True, "path": str(folder)})
+
+    @app.get("/api/update/cleanup")
+    def update_cleanup_targets():
+        return jsonify({
+            "ok": True,
+            "data_dir": str(data_dir),
+            "targets": update_service.cleanup_targets(),
+        })
+
+    @app.post("/api/update/cleanup")
+    def update_cleanup():
+        body = request.get_json(silent=True) or {}
+        keys = body.get("keys")
+        if not isinstance(keys, list):
+            return json_error("请选择要清理的项目。", 400)
+        if len(keys) > 32:
+            return json_error("清理项目过多。", 400)
+        return jsonify(update_service.cleanup([str(key) for key in keys]))
 
     @app.get("/api/settings")
     def get_settings():

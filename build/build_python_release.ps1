@@ -8,7 +8,7 @@ $BuildDir = Join-Path $Root "build"
 $DistDir = Join-Path $Root "dist-python"
 $Stage = Join-Path $DistDir "PLA-MMO-Seed-Path"
 $ReleaseDir = Join-Path $Root "release"
-$Version = "0.9.5"
+$Version = "0.9.6"
 $AppName = "PLA-MMO-Seed-Path"
 
 function Find-Python {
@@ -100,8 +100,42 @@ if (-not $PortableOnly) {
     if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed." }
 }
 
+$SetupExe = Join-Path $ReleaseDir "$AppName-$Version-Setup.exe"
+$notesPath = Join-Path $Root "docs\RELEASE_NOTES.md"
+if (Test-Path $notesPath) {
+    $notes = (Get-Content $notesPath -Raw -Encoding UTF8).Trim()
+} else {
+    $notes = "Release $Version."
+}
+$assetBase = "https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v$Version"
+$portableHash = (Get-FileHash $PortableZip -Algorithm SHA256).Hash.ToLower()
+$manifestAssets = @{
+    portable = @{
+        name = (Split-Path $PortableZip -Leaf)
+        url = "$assetBase/$([uri]::EscapeDataString((Split-Path $PortableZip -Leaf)))"
+        size = (Get-Item $PortableZip).Length
+        sha256 = $portableHash
+    }
+}
+if (Test-Path $SetupExe) {
+    $manifestAssets.setup = @{
+        name = (Split-Path $SetupExe -Leaf)
+        url = "$assetBase/$([uri]::EscapeDataString((Split-Path $SetupExe -Leaf)))"
+        size = (Get-Item $SetupExe).Length
+        sha256 = (Get-FileHash $SetupExe -Algorithm SHA256).Hash.ToLower()
+    }
+}
+$manifest = @{
+    version = $Version
+    published_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    release_url = "https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/tag/v$Version"
+    notes = $notes
+    assets = $manifestAssets
+}
+$manifest | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 (Join-Path $ReleaseDir "update.json")
+
 $hashLines = @()
-foreach ($file in Get-ChildItem $ReleaseDir -File | Where-Object { $_.Extension -in @(".zip", ".exe") }) {
+foreach ($file in Get-ChildItem $ReleaseDir -File | Where-Object { $_.Name -eq "update.json" -or $_.Name -like "*$Version*" -or $_.Name -like "pokeldn-slim-*" }) {
     $hash = Get-FileHash $file.FullName -Algorithm SHA256
     $hashLines += "$($hash.Hash.ToLower())  $($file.Name)"
 }
