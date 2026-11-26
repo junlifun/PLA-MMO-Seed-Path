@@ -2,6 +2,7 @@
 #define AppVersion "0.9.5"
 #define AppPublisher "君粒"
 #define AppExeName "PLA-MMO-Seed-Path.exe"
+#define LauncherName "启动独立窗口.bat"
 #define SourceDir "..\dist\PLA-MMO-Seed-Path"
 #define OutputDir "..\release"
 #define AppIcon "..\static\app.ico"
@@ -42,8 +43,8 @@ Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: 
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#LauncherName}"; Flags: runminimized
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#LauncherName}"; Tasks: desktopicon; Flags: runminimized
 
 [Run]
-Filename: "{app}\{#AppExeName}"; Description: "启动 {#AppName}"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\{#LauncherName}"; Description: "启动 {#AppName}"; Flags: postinstall nowait skipifsilent

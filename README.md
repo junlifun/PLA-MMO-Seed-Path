@@ -18,7 +18,14 @@
 - [Pokeldn 精简运行时](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/pokeldn-slim-v0.66.12.zip)
 - [SHA256 校验文件](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/SHA256SUMS.txt)
 
-安装版按用户安装，不需要管理员权限。便携版解压后直接运行 `PLA-MMO-Seed-Path.exe`。
+安装版按用户安装，不需要管理员权限。便携版解压后直接运行：
+
+```text
+启动独立窗口.bat
+```
+
+**不要直接双击 `PLA-MMO-Seed-Path.exe`。**  
+启动器会打开一个独立的 Edge App 窗口，窗口里没有浏览器地址栏和标签页；直接运行 EXE 只会打开普通浏览器。
 
 ## 功能
 

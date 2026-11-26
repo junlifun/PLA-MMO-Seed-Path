@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import ctypes
 import json
 import os
 import platform
 import re
 import shutil
+import subprocess
 import sys
+import tempfile
 import traceback
 from datetime import datetime
 import threading
@@ -786,6 +789,89 @@ def _apply_windows_app_icon(window_title: str, icon_path: Path) -> bool:
         return False
 
 
+def _edge_executable() -> Path | None:
+    candidates = [
+        Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Microsoft" / "Edge" / "Application" / "msedge.exe",
+        Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Microsoft" / "Edge" / "Application" / "msedge.exe",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "Edge" / "Application" / "msedge.exe",
+    ]
+    for path in candidates:
+        if path.is_file():
+            return path
+    return None
+
+
+def _run_edge_app_window(app: Flask, url: str, port: int) -> None:
+    """Run a standalone Edge ``--app`` window with the local UI.
+
+    This is the packaged fallback when pythonnet/WebView2 cannot be loaded.  It
+    still gives a single dedicated window with no tabs or address bar, instead
+    of opening the user's normal browser.
+    """
+    from werkzeug.serving import make_server
+    import time
+
+    edge = _edge_executable()
+    if edge is None:
+        raise RuntimeError("未找到 Microsoft Edge，无法打开独立窗口。")
+    profile = get_data_dir() / "webview2-profile"
+    profile.mkdir(parents=True, exist_ok=True)
+
+    server = make_server("127.0.0.1", port, app, threaded=True)
+    thread = threading.Thread(target=server.serve_forever, name="pla-edge-server", daemon=True)
+    thread.start()
+    if not _wait_for_local_server(url):
+        server.shutdown()
+        server.server_close()
+        raise RuntimeError(f"本地服务未能在规定时间内启动：{url}")
+
+    # A windowed PyInstaller process has unusual inherited handles.  Launch
+    # Edge through the shell's "start" command so the window is created by the
+    # normal user shell, not by the frozen host process.
+    args = [
+        "cmd.exe", "/c", "start", "", str(edge),
+        f"--app={url}",
+        "--window-size=1440,900",
+        f"--user-data-dir={profile}",
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--disable-background-mode",
+    ]
+    subprocess.Popen(
+        args,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        creationflags=0,
+    )
+    try:
+        # msedge.exe often returns immediately while the actual browser window
+        # lives in a child process.  Keep the local server alive until no Edge
+        # process using this dedicated profile remains.
+        import psutil
+
+        token = str(profile).lower()
+        time.sleep(5.0)
+        while True:
+            alive = False
+            for proc in psutil.process_iter(["cmdline"]):
+                try:
+                    cmdline = " ".join(proc.info.get("cmdline") or []).lower()
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+                if token in cmdline:
+                    alive = True
+                    break
+            if not alive:
+                break
+            time.sleep(1.0)
+    finally:
+        try:
+            server.shutdown()
+        finally:
+            server.server_close()
+
+
 def _run_desktop_window(app: Flask, url: str, port: int, development: bool = False) -> None:
     """Run Flask behind a native WebView2 window and always release its socket."""
     from pla_mmo.settings import get_data_dir
@@ -796,9 +882,6 @@ def _run_desktop_window(app: Flask, url: str, port: int, development: bool = Fal
     webview_data_dir = get_data_dir() / "webview2-profile"
     webview_data_dir.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("WEBVIEW2_USER_DATA_FOLDER", str(webview_data_dir))
-    # PyInstaller can make pythonnet choose .NET Framework first; the WebView2
-    # backend needs the CoreCLR runtime in the frozen build.
-    os.environ.setdefault("PYTHONNET_RUNTIME", "coreclr")
 
     try:
         import webview
@@ -867,6 +950,9 @@ def _run_desktop_window(app: Flask, url: str, port: int, development: bool = Fal
             # When the last native window closes, pywebview returns from start().
             webview.start(gui="edgechromium", debug=development)
         except Exception as exc:
+            import traceback
+            traceback.print_exc()
+            print(f"[WEBVIEW-ERROR] {type(exc).__name__}: {exc}", flush=True)
             _append_runtime_error("独立应用窗口启动失败", exc, {"url": url})
             raise RuntimeError(
                 "独立窗口启动失败。请确认 Windows 已安装 Microsoft Edge WebView2 Runtime，"
@@ -1000,13 +1086,13 @@ if __name__ == "__main__":
         try:
             _run_desktop_window(app, url, port, development=development)
         except Exception as exc:
-            # A packaged build may not have a working pythonnet/WebView2
-            # combination.  Keep the app usable by opening the same local UI
-            # in the default browser instead of showing a fatal error.
+            # Last-resort fallback for a machine without Edge.  The packaged
+            # build uses Edge's dedicated --app window above, so it does not
+            # depend on the fragile pythonnet/WebView2 packaging path.
             print(f"[WARN] 独立窗口启动失败，改用浏览器：{exc}")
             _append_runtime_error("独立窗口启动失败，回退浏览器", exc, {"url": url})
             try:
-                if not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+                if os.environ.get("PLA_NO_BROWSER") != "1" and (not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true"):
                     threading.Timer(1.0, lambda: webbrowser.open(url)).start()
                 app.run(
                     host="127.0.0.1",
@@ -1020,7 +1106,7 @@ if __name__ == "__main__":
                 _show_fatal_error(str(fallback_exc))
                 raise SystemExit(3) from fallback_exc
     else:
-        if not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        if os.environ.get("PLA_NO_BROWSER") != "1" and (not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true"):
             threading.Timer(1.0, lambda: webbrowser.open(url)).start()
         app.run(
             host="127.0.0.1",

@@ -60,6 +60,7 @@ $MainDir = Join-Path $DistDir $AppName
 if (-not (Test-Path (Join-Path $MainDir "$AppName.exe"))) {
     throw "主程序编译产物不存在：$MainDir"
 }
+Copy-Item (Join-Path $Root "启动独立窗口.bat") (Join-Path $MainDir "启动独立窗口.bat") -Force
 
 $HelpersDir = Join-Path $MainDir "helpers"
 New-Item -ItemType Directory -Path $HelpersDir -Force | Out-Null

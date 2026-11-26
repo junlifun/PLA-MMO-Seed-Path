@@ -28,11 +28,12 @@ hiddenimports += [
     "usb",
     "usb.core",
     "usb.backend.libusb1",
+    "psutil",
     "esptool",
     "PIL",
 ]
 
-for package in ("z3", "webview", "esptool", "usb", "serial"):
+for package in ("z3", "webview", "esptool", "usb", "serial", "psutil"):
     try:
         package_datas, package_binaries, package_hidden = collect_all(package)
         datas += package_datas
@@ -73,6 +74,7 @@ exe = EXE(
     console=False,
     disable_windowed_traceback=False,
     icon=str(ROOT / "static" / "app.ico"),
+    contents_directory=".",
 )
 
 coll = COLLECT(
