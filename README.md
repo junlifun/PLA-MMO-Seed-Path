@@ -18,7 +18,7 @@
 - [Pokeldn 精简运行时 r3](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.15/pokeldn-slim-v0.66.12-r3.zip)
 - [SHA256 校验文件](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.15/SHA256SUMS.txt)
 
-> v0.9.15 是增量更新测试版：0.9.14 用户只需下载约 120 KB 的增量包；0.9.13 及更早版本、或首次安装仍需完整包一次。从 v0.9.6 起可在应用内检查更新。
+> v0.9.15 是增量更新测试版：0.9.14 用户只需下载约 105 KB 的增量包；0.9.13 及更早版本、或首次安装仍需完整包一次。从 v0.9.6 起可在应用内检查更新。
 
 安装版按用户安装，不需要管理员权限，安装后从开始菜单或桌面快捷方式启动。
 
