@@ -6,7 +6,7 @@
 > 旧仓库仅保留测 Seed 相关功能；本项目同时支持联机采集 Seed、地图点位和闪光路径计算。
 
 - 作者：**君粒**
-- 当前版本：**v0.9.11（本地测试，尚未发布）**
+- 当前版本：**v0.9.12（本地测试，尚未发布）**
 - 许可证：**GPL v3.0**
 - 平台：Windows 10 / 11
 - 状态：公开仓库
@@ -18,7 +18,7 @@
 - [Pokeldn 精简运行时 r3](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.10/pokeldn-slim-v0.66.12-r3.zip)
 - [SHA256 校验文件](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.10/SHA256SUMS.txt)
 
-> v0.9.11 目前只在本地测试，下面的下载链接仍是已发布的 v0.9.10。稳定后再统一更新下载链接。
+> v0.9.12 目前只在本地测试，下面的下载链接仍是已发布的 v0.9.10。稳定后再统一更新下载链接。
 
 安装版按用户安装，不需要管理员权限，安装后从开始菜单或桌面快捷方式启动。
 
@@ -98,8 +98,8 @@ python app.py
 输出在 `release`：
 
 ```text
-PLA-MMO-Seed-Path-0.9.11-Setup.exe
-PLA-MMO-Seed-Path-0.9.11-portable.zip
+PLA-MMO-Seed-Path-0.9.12-Setup.exe
+PLA-MMO-Seed-Path-0.9.12-portable.zip
 update.json
 SHA256SUMS.txt
 ```

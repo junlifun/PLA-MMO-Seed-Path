@@ -284,7 +284,57 @@ function updateDiagnosticsBanner() {
   } else {
     banner.classList.add("hidden");
   }
+  refreshTopAlertOffset();
 }
+
+let globalAlertKind = "";
+
+function showGlobalAlert(title, message, options = {}) {
+  const banner = $("global-alert");
+  if (!banner) return;
+  globalAlertKind = options.kind || "operation";
+  $("global-alert-title").textContent = title || "操作未完成";
+  $("global-alert-message").textContent = message || "";
+  const fix = $("global-alert-fix");
+  if (fix) {
+    const action = options.action || "resources";
+    fix.hidden = action === "none";
+    fix.textContent = options.actionLabel || "查看资源管理";
+    fix.dataset.action = action;
+  }
+  banner.classList.remove("hidden");
+  refreshTopAlertOffset();
+}
+
+function hideGlobalAlert(kind = "") {
+  if (kind && globalAlertKind !== kind) return;
+  const banner = $("global-alert");
+  if (!banner) return;
+  banner.classList.add("hidden");
+  globalAlertKind = "";
+  refreshTopAlertOffset();
+}
+
+function refreshTopAlertOffset() {
+  const ids = ["global-alert", "diagnostics-banner", "update-banner"];
+  let total = 0;
+  for (const id of ids) {
+    const node = document.getElementById(id);
+    if (!node || node.classList.contains("hidden") || !node.getClientRects().length) continue;
+    total += node.getBoundingClientRect().height + 14;
+  }
+  document.documentElement.style.setProperty("--top-alert-offset", `${total}px`);
+}
+
+window.addEventListener("resize", refreshTopAlertOffset);
+if (typeof ResizeObserver === "function") {
+  const topAlertObserver = new ResizeObserver(() => refreshTopAlertOffset());
+  ["global-alert", "diagnostics-banner", "update-banner"].forEach(id => {
+    const node = document.getElementById(id);
+    if (node) topAlertObserver.observe(node);
+  });
+}
+refreshTopAlertOffset();
 
 async function copyDiagnosticsReport() {
   try {
@@ -5198,13 +5248,17 @@ function renderLinkQuick(data) {
   }
   const error = $("link-quick-error");
   if (error) {
-    if (data.error) {
-      error.textContent = data.error;
-      error.classList.remove("hidden");
-    } else {
-      error.classList.add("hidden");
-      error.textContent = "";
-    }
+    error.classList.add("hidden");
+    error.textContent = "";
+  }
+  if (data.error && phase !== "done") {
+    showGlobalAlert("联机测 Seed 未完成", data.error, {
+      kind: "link",
+      action: "resources",
+      actionLabel: "查看资源管理"
+    });
+  } else {
+    hideGlobalAlert("link");
   }
   // 停止进行中：后端 stop() 返回时进程可能还活着，必须等轮询确认 running=false
   // 才算真正结束，否则按钮会被仍为 true 的旧快照刷回"点击停止"。
@@ -5273,14 +5327,16 @@ async function startLinkQuick() {
     renderLinkQuick(data);
     setLinkQuickButtonState("running");
     ensureLinkQuickPolling();
+    hideGlobalAlert("link-start");
+    hideGlobalAlert("link-stop");
     showToast("已开始联机采集，请按提示在 Switch 上操作。");
   } catch (error) {
     setLinkQuickButtonState("idle");
-    const node = $("link-quick-error");
-    if (node) {
-      node.textContent = error.message;
-      node.classList.remove("hidden");
-    }
+    showGlobalAlert("无法启动联机采集", error.message, {
+      kind: "link-start",
+      action: "resources",
+      actionLabel: "查看资源管理"
+    });
   }
 }
 
@@ -5300,15 +5356,16 @@ async function stopLinkQuick() {
       linkQuickStopTimer = null;
       setLinkQuickButtonState("idle");
     }, 35000);
+    hideGlobalAlert("link-stop");
     renderLinkSeedStatus(data);
     renderLinkQuick(data);
   } catch (error) {
     setLinkQuickButtonState("running");
-    const node = $("link-quick-error");
-    if (node) {
-      node.textContent = `停止失败：${error.message}`;
-      node.classList.remove("hidden");
-    }
+    showGlobalAlert("停止联机采集失败", `停止失败：${error.message}`, {
+      kind: "link-stop",
+      action: "resources",
+      actionLabel: "查看资源管理"
+    });
   }
 }
 
@@ -5628,10 +5685,15 @@ async function startLinkSeed() {
 async function stopLinkSeed() {
   try {
     const data = await api("/api/link/stop", { method: "POST", body: JSON.stringify({}), timeoutMs: 30000 });
+    hideGlobalAlert("link-stop");
     renderLinkSeedStatus(data);
     showToast("正在停止采集并释放无线板…");
   } catch (error) {
-    showLinkSeedError(`停止失败：${error.message}`);
+    showGlobalAlert("停止联机采集失败", `停止失败：${error.message}`, {
+      kind: "link-stop",
+      action: "resources",
+      actionLabel: "查看资源管理"
+    });
   }
 }
 
@@ -5825,6 +5887,17 @@ $("open-cache-folder").addEventListener("click", async () => {
 $("resource-prompt-download").addEventListener("click", downloadMissingResources);
 $("resource-prompt-later").addEventListener("click", dismissResourcePrompt);$("copy-engine-log").addEventListener("click", copyDiagnosticsReport);
 $("copy-diagnostics-banner").addEventListener("click", copyDiagnosticsReport);
+$("global-alert-close")?.addEventListener("click", () => hideGlobalAlert());
+$("global-alert-fix")?.addEventListener("click", () => {
+  const action = $("global-alert-fix")?.dataset?.action || "resources";
+  if (action === "resources") {
+    closeLinkSeedModal?.();
+    openSettingsModal();
+    activateSettingsTab("resources");
+    loadResources();
+  }
+  hideGlobalAlert();
+});
 $("copy-installer-log-path").addEventListener("click", () => copyText("offline_engine_setup.log"));
 
 $("engine-auto-install").addEventListener("click", () => startEngineInstall("auto"));
@@ -6328,6 +6401,7 @@ function setUpdateBannerVisible(visible, version = "") {
   if (visible && $("update-banner-version")) {
     $("update-banner-version").textContent = version ? `v${String(version).replace(/^v/i, "")}` : "发现新版本";
   }
+  refreshTopAlertOffset();
 }
 
 function renderUpdateCheck(data) {

@@ -33,7 +33,7 @@ from pla_mmo.pokemon_assets import PokemonAssetManager
 from pla_mmo.launcher import choose_local_port
 from pla_mmo.updater import UpdateError, UpdateService
 
-APP_VERSION = "0.9.11"
+APP_VERSION = "0.9.12"
 AUTHOR_NAME = "君粒"
 
 PROJECT_ROOT = get_project_root()
