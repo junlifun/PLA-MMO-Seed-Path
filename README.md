@@ -11,6 +11,15 @@
 - 平台：Windows 10 / 11
 - 状态：公开仓库
 
+## 下载
+
+- [Windows 安装版 v0.9.5](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/PLA-MMO-Seed-Path-0.9.5-Setup.exe)
+- [Windows 便携版 v0.9.5](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/PLA-MMO-Seed-Path-0.9.5-portable.zip)
+- [Pokeldn 精简运行时](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/pokeldn-slim-v0.66.12.zip)
+- [SHA256 校验文件](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/SHA256SUMS.txt)
+
+安装版按用户安装，不需要管理员权限。便携版解压后直接运行 `PLA-MMO-Seed-Path.exe`。
+
 ## 功能
 
 - 联机采集 2–4 只最初捕获宝可梦，并反推 MMO 群体 Seed
