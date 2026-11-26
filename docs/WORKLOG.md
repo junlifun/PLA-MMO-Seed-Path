@@ -9,7 +9,8 @@
   - 运行时新增 `release/pokeldn-slim-v0.66.12-r3.zip`，包含 `netlink` 包及其 GPL-3.0 许可证。
   - 打包运行时把 `vendor/python-netlink/netlink` 放入自带 Python 的 `site-packages`，旧精简运行时用户升级程序后也能直接启动。
   - 采集器现在会把 `[pla]` 的启动错误转发到 UI，并在退出代码 2 时附带最近一条真实错误，不再只提示“请检查右侧输出”。
-  - 版本号 0.9.10，已按用户要求准备发布；发布前修正 `update.json` 更新日志的 UTF-8 读取问题。
+  - 版本号 0.9.10，已发布：https://github.com/junlifun/PLA-MMO-Seed-Path/releases/tag/v0.9.10
+  - 发布前修正 `update.json` 更新日志的 UTF-8 读取问题，应用内不再显示乱码。
 - 本地验证：
   - `dist-python` 自带 Python + 旧 r2 运行时（缺 netlink）能 `import netlink` 并让 `pla_host.py` 进入 `AP up` / `Hosting`，不再返回 2。
   - 测试版 UI 启动采集后进入 `waiting`，日志显示“正在等待 Switch”，未再出现代码 2；停止采集正常释放 COM5。
