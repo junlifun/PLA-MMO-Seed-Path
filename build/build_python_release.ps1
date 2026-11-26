@@ -140,12 +140,13 @@ $manifest = @{
     notes = $notes
     assets = $manifestAssets
 }
-$manifest | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 (Join-Path $ReleaseDir "update.json")
+$manifestJson = $manifest | ConvertTo-Json -Depth 8
+[IO.File]::WriteAllText((Join-Path $ReleaseDir "update.json"), $manifestJson, [Text.UTF8Encoding]::new($false))
 
 $hashLines = @()
 foreach ($file in Get-ChildItem $ReleaseDir -File | Where-Object { $_.Name -eq "update.json" -or $_.Name -like "*$Version*" -or $_.Name -like "pokeldn-slim-*" }) {
     $hash = Get-FileHash $file.FullName -Algorithm SHA256
     $hashLines += "$($hash.Hash.ToLower())  $($file.Name)"
 }
-$hashLines | Set-Content -Encoding utf8 (Join-Path $ReleaseDir "SHA256SUMS.txt")
+[IO.File]::WriteAllText((Join-Path $ReleaseDir "SHA256SUMS.txt"), (($hashLines -join "`r`n") + "`r`n"), [Text.UTF8Encoding]::new($false))
 Get-ChildItem $ReleaseDir -File | Select-Object Name, Length | Format-Table -AutoSize
