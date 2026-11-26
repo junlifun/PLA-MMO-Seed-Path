@@ -95,7 +95,7 @@ class ResourceManager:
                 "name": "Pokeldn 联机运行时",
                 "summary": "精简源码运行时（下载约 20 MB，解压约 44 MB）；用于联机采集。",
                 "target": self.cache_root / "pokeldn-slim",
-                "marker": "pokeldn/__init__.py",
+                "marker": "pokeldn-slim/POKELDN-LICENSE.txt",
                 "url": POKELDN_ZIP_URL,
                 "sha256": POKELDN_ZIP_SHA256,
                 "size": POKELDN_ZIP_SIZE,
@@ -417,11 +417,15 @@ class ResourceManager:
                     part = self._download(key, spec["url"], archive, spec["size"], spec["sha256"])
                     os.replace(part, archive)
                 self._extract_zip(key, archive, target, spec["marker"])
+                if not self._is_installed(key):
+                    raise ResourceError("安装后校验未通过：运行环境目录结构不完整。")
                 archive.unlink(missing_ok=True)
             elif spec["kind"] == "file":
                 target.parent.mkdir(parents=True, exist_ok=True)
                 part = self._download(key, spec["url"], target, spec["size"], spec["sha256"])
                 os.replace(part, target)
+                if not self._is_installed(key):
+                    raise ResourceError("安装后校验未通过：文件不存在或为空。")
             self._set_state(key, status="success", percent=100, message="安装完成。", error="")
         except Exception as exc:
             self._set_state(key, status="failed", percent=0, message="安装失败。", error=str(exc))
