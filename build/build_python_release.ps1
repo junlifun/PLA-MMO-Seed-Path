@@ -113,7 +113,7 @@ if (-not $PortableOnly) {
 $SetupExe = Join-Path $ReleaseDir "$AppName-$Version-Setup.exe"
 $notesPath = Join-Path $Root "docs\RELEASE_NOTES.md"
 if (Test-Path $notesPath) {
-    $notes = (Get-Content $notesPath -Raw -Encoding UTF8).Trim()
+    $notes = [IO.File]::ReadAllText($notesPath, [Text.Encoding]::UTF8).Trim()
 } else {
     $notes = "Release $Version."
 }
