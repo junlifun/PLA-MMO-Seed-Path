@@ -8,7 +8,7 @@ $BuildDir = Join-Path $Root "build"
 $DistDir = Join-Path $Root "dist-python"
 $Stage = Join-Path $DistDir "PLA-MMO-Seed-Path"
 $ReleaseDir = Join-Path $Root "release"
-$Version = "0.9.8"
+$Version = "0.9.9"
 $AppName = "PLA-MMO-Seed-Path"
 $PublicRepo = "junlifun/PLA-MMO-Seed-Path"
 $LegacyRepo = "Yuutalin/PLA-MMO-Seed-Path"
@@ -52,6 +52,7 @@ $packages = @(
     "flask", "jinja2", "werkzeug", "click", "itsdangerous", "blinker", "markupsafe",
     "webview", "pythonnet", "clr_loader", "proxy_tools", "bottle",
     "z3", "serial", "usb", "psutil", "PIL", "cffi", "pycparser",
+    "attrs", "attr", "outcome", "sniffio", "sortedcontainers", "idna",
     "esptool", "esp_pylib", "cryptography", "reedsolo", "intelhex",
     "rich", "rich_click", "mdurl", "markdown_it", "pygments", "colorama"
 )
@@ -66,7 +67,7 @@ foreach ($file in @("clr.py", "bottle.py", "typing_extensions.py", "_cffi_backen
 
 # Copy package metadata needed by packages that query importlib.metadata.
 Get-ChildItem $SourceSite -Directory -Filter "*.dist-info" | Where-Object {
-    $_.Name -match "^(Flask|Jinja2|Werkzeug|click|itsdangerous|blinker|MarkupSafe|pywebview|pythonnet|clr_loader|proxy_tools|bottle|z3|pyserial|pyusb|psutil|pillow|cffi|pycparser|esptool|esp_pylib|cryptography|reedsolo|intelhex|rich|rich_click|mdurl|markdown-it-py|Pygments|colorama|typing_extensions)"
+    $_.Name -match "^(Flask|Jinja2|Werkzeug|click|itsdangerous|blinker|MarkupSafe|pywebview|pythonnet|clr_loader|proxy_tools|bottle|z3|pyserial|pyusb|psutil|pillow|cffi|pycparser|attrs|outcome|sniffio|sortedcontainers|idna|esptool|esp_pylib|cryptography|reedsolo|intelhex|rich|rich_click|mdurl|markdown-it-py|Pygments|colorama|typing_extensions)"
 } | ForEach-Object { Copy-Item $_.FullName (Join-Path $Site $_.Name) -Recurse -Force }
 
 @"
