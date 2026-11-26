@@ -18,14 +18,18 @@
 - [Pokeldn 精简运行时](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/pokeldn-slim-v0.66.12.zip)
 - [SHA256 校验文件](https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v0.9.5/SHA256SUMS.txt)
 
-安装版按用户安装，不需要管理员权限。便携版解压后直接运行：
+安装版按用户安装，不需要管理员权限，安装后从开始菜单或桌面快捷方式启动。
+
+便携版解压后运行：
 
 ```text
-启动独立窗口.bat
+Start-PLA.bat
 ```
 
-**不要直接双击 `PLA-MMO-Seed-Path.exe`。**  
-启动器会打开一个独立的 Edge App 窗口，窗口里没有浏览器地址栏和标签页；直接运行 EXE 只会打开普通浏览器。
+或双击 `Start-PLA.vbs`（不显示控制台窗口）。
+
+程序使用自带的 Python + 原生 WebView2 窗口启动，**不使用 Edge App，也不会打开浏览器地址栏**。  
+建议解压到较短的路径（例如 `D:\PLA-MMO-Seed-Path`），避免 Windows 旧式路径长度限制影响 WebView2 初始化。
 
 ## 功能
 
@@ -52,7 +56,7 @@
 要求：
 
 - Windows 10 / 11
-- Python 3.10+
+- Python 3.13（与打包运行时一致）
 - Microsoft Edge WebView2 Runtime
 
 ```powershell
@@ -66,7 +70,7 @@ python app.py
 
 需要：
 
-- Python 3.10+
+- Python 3.13
 - Inno Setup 6（仅生成安装包时需要）
 
 双击：
@@ -86,18 +90,18 @@ SHA256SUMS.txt
 如果只想要便携版：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build\build_release.ps1 -PortableOnly
+powershell -ExecutionPolicy Bypass -File build\build_python_release.ps1 -PortableOnly
 ```
 
 编译脚本会：
 
-- 编译主程序；
-- 编译 `seed-helper` 和 `esptool-helper`；
-- 生成便携 ZIP；
-- 生成按用户安装的 Setup；
+- 复制应用源码；
+- 复制 Python 3.13 运行时及必要依赖；
+- 生成便携 ZIP（内含 `python\pythonw.exe`）；
+- 生成按用户安装的 Setup（快捷方式直接启动 `pythonw.exe app.py`）；
 - 生成 SHA256 校验文件。
 
-编译产物不包含 `cache`、`prod.keys`、用户设置或日志。
+编译产物不包含 `cache`、`prod.keys`、用户设置或日志；不使用 PyInstaller，也不使用 Edge App 启动器。
 
 ## 联机运行时
 

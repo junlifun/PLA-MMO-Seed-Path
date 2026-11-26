@@ -3,7 +3,7 @@ setlocal EnableExtensions
 chcp 65001 >nul
 title PLA MMO Seed ^& Path - Build
 cd /d "%~dp0"
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0build\build_release.ps1" %*
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0build\build_python_release.ps1" %*
 set "RESULT=%ERRORLEVEL%"
 echo.
 if not "%RESULT%"=="0" (

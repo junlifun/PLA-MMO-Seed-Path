@@ -1,9 +1,9 @@
-﻿#define AppName "PLA MMO Seed & Path"
+#define AppName "PLA MMO Seed & Path"
 #define AppVersion "0.9.5"
 #define AppPublisher "君粒"
-#define AppExeName "PLA-MMO-Seed-Path.exe"
-#define LauncherName "启动独立窗口.bat"
-#define SourceDir "..\dist\PLA-MMO-Seed-Path"
+#define PythonwExe "python\pythonw.exe"
+
+#define SourceDir "..\dist-python\PLA-MMO-Seed-Path"
 #define OutputDir "..\release"
 #define AppIcon "..\static\app.ico"
 
@@ -21,7 +21,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir={#OutputDir}
 OutputBaseFilename=PLA-MMO-Seed-Path-{#AppVersion}-Setup
 SetupIconFile={#AppIcon}
-UninstallDisplayIcon={app}\{#AppExeName}
+UninstallDisplayIcon={app}\static\app.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -43,8 +43,8 @@ Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: 
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#LauncherName}"; Flags: runminimized
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#LauncherName}"; Tasks: desktopicon; Flags: runminimized
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#PythonwExe}"; Parameters: """{app}\app.py"""; WorkingDir: "{app}"; IconFilename: "{app}\static\app.ico"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#PythonwExe}"; Parameters: """{app}\app.py"""; WorkingDir: "{app}"; IconFilename: "{app}\static\app.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#LauncherName}"; Description: "启动 {#AppName}"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\{#PythonwExe}"; Parameters: """{app}\app.py"""; WorkingDir: "{app}"; Description: "启动 {#AppName}"; Flags: postinstall nowait skipifsilent
