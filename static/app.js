@@ -5010,7 +5010,7 @@ function renderLinkSeedCurrent(data) {
         : phase === "starting"
           ? "正在启动采集…"
           : phase === "done"
-            ? "四只已收齐"
+            ? (count ? `已收录 ${count} 只` : "等待记录")
             : phase === "failed"
               ? "采集失败"
               : phase === "stopped"
@@ -5021,7 +5021,7 @@ function renderLinkSeedCurrent(data) {
       : phase === "waiting"
         ? "在祝庆村找交换 NPC → 本地交换 → 输入本页相同密码。"
         : phase === "solving"
-          ? "EtumrepMMO 正在检查四只记录"
+          ? "EtumrepMMO 正在检查已收录的记录"
           : "点「开始采集」后，在 Switch 选择最初捕获的宝可梦";
   }
   name.textContent = currentName;
@@ -5068,7 +5068,7 @@ function renderLinkSeedProgress(data) {
   } else if (phase === "solving") {
     const entity = Math.max(1, Math.min(4, Number(data.entity) || 1));
     const percent = Math.round(Number(data.percent) || 0);
-    text = `反推 Seed：第 ${entity}/4 只`;
+    text = `反推 Seed：第 ${entity}/${Math.max(count, entity)} 只`;
     detail = percent > 0
       ? `EtumrepMMO 正在比对第 ${entity} 只的个体值/性格/招式，当前 ${percent}%。`
       : `四只已就绪，EtumrepMMO 正在检查第 ${entity} 只。`;
@@ -5405,6 +5405,12 @@ function renderLinkSeedStatus(data) {
   const count = Math.max(0, Math.min(4, Number(data.count) || 0));
   linkSeedCount = count;
   const phaseLabel = LINK_SEED_PHASE_LABELS[phase] || phase;
+  const resultHint = $("link-seed-result-hint");
+  if (resultHint) {
+    resultHint.textContent = count >= 2
+      ? `已收录 ${count} 只${count >= 4 ? "" : "，可继续或完成"}`
+      : "等待 2–4 只记录";
+  }
 
   renderLinkSeedCards(data);
   renderLinkSeedCompactSlots(data);
@@ -5646,7 +5652,7 @@ async function solveLastLinkSeed() {
     });
     renderLinkSeedStatus(data);
     ensureLinkSeedPolling();
-    showToast("正在用最近保存的四只记录重算 Seed…");
+    showToast("正在用最近保存的记录重算 Seed…");
   } catch (error) {
     showLinkSeedError(`重算失败：${error.message}`);
   }
