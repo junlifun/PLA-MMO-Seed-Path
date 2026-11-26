@@ -23,7 +23,7 @@ from pla_mmo.seed_link import PLUGIN_ID
 
 POKELDN_VERSION = "v0.66.12"
 POKELDN_ZIP_URL = (
-    "https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/"
+    "https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/"
     "v0.9.5/pokeldn-slim-v0.66.12.zip"
 )
 POKELDN_ZIP_SHA256 = "6317e249c8896de2259468d41e751965fe76be64cc4e9044b6d38fa7b0c60a65"

@@ -6703,7 +6703,7 @@ function initUpdateUI() {
   $("update-skip")?.addEventListener("click", skipUpdateVersion);
   $("update-open-release")?.addEventListener("click", async () => {
     try { await updateRequest("/api/update/open-release", { method: "POST", timeoutMs: 10000 }); }
-    catch (_) { window.open("https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/latest", "_blank", "noopener"); }
+    catch (_) { window.open("https://github.com/junlifun/PLA-MMO-Seed-Path/releases/latest", "_blank", "noopener"); }
   });
   $("update-open-folder")?.addEventListener("click", async () => {
     try { await updateRequest("/api/update/open-folder", { method: "POST", timeoutMs: 15000 }); }

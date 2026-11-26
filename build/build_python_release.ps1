@@ -8,8 +8,10 @@ $BuildDir = Join-Path $Root "build"
 $DistDir = Join-Path $Root "dist-python"
 $Stage = Join-Path $DistDir "PLA-MMO-Seed-Path"
 $ReleaseDir = Join-Path $Root "release"
-$Version = "0.9.7"
+$Version = "0.9.8"
 $AppName = "PLA-MMO-Seed-Path"
+$PublicRepo = "junlifun/PLA-MMO-Seed-Path"
+$LegacyRepo = "Yuutalin/PLA-MMO-Seed-Path"
 
 function Find-Python {
     $candidate = Get-Command python -ErrorAction SilentlyContinue
@@ -107,7 +109,12 @@ if (Test-Path $notesPath) {
 } else {
     $notes = "Release $Version."
 }
-$assetBase = "https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/download/v$Version"
+# Transitional manifest: keep asset URLs on the legacy repository for this
+# release so 0.9.6/0.9.7 updaters (which only accept the old prefix) can still
+# download it. GitHub redirects the legacy path to the renamed repository.
+# Switch $ManifestAssetRepo to $PublicRepo after those old versions retire.
+$ManifestAssetRepo = $LegacyRepo
+$assetBase = "https://github.com/$ManifestAssetRepo/releases/download/v$Version"
 $portableHash = (Get-FileHash $PortableZip -Algorithm SHA256).Hash.ToLower()
 $manifestAssets = @{
     portable = @{
@@ -128,7 +135,7 @@ if (Test-Path $SetupExe) {
 $manifest = @{
     version = $Version
     published_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    release_url = "https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/tag/v$Version"
+    release_url = "https://github.com/$PublicRepo/releases/tag/v$Version"
     notes = $notes
     assets = $manifestAssets
 }

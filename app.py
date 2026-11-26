@@ -33,7 +33,7 @@ from pla_mmo.pokemon_assets import PokemonAssetManager
 from pla_mmo.launcher import choose_local_port
 from pla_mmo.updater import UpdateError, UpdateService
 
-APP_VERSION = "0.9.7"
+APP_VERSION = "0.9.8"
 AUTHOR_NAME = "君粒"
 
 PROJECT_ROOT = get_project_root()
@@ -384,7 +384,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     @app.post("/api/update/open-release")
     def update_open_release():
         try:
-            webbrowser.open(update_service.snapshot().get("check", {}).get("release_url") or "https://github.com/Yuutalin/PLA-MMO-Seed-Path/releases/latest")
+            webbrowser.open(update_service.snapshot().get("check", {}).get("release_url") or "https://github.com/junlifun/PLA-MMO-Seed-Path/releases/latest")
         except Exception as exc:
             return json_error(f"无法打开浏览器：{exc}", 500)
         return jsonify({"ok": True})

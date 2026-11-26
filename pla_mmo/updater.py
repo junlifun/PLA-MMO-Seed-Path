@@ -33,14 +33,25 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 
-REPOSITORY = "Yuutalin/PLA-MMO-Seed-Path"
-RELEASE_PAGE = f"https://github.com/{REPOSITORY}/releases/latest"
-MANIFEST_URL = (
-    f"https://github.com/{REPOSITORY}/releases/latest/download/update.json"
+PRIMARY_REPOSITORY = "junlifun/PLA-MMO-Seed-Path"
+LEGACY_REPOSITORY = "Yuutalin/PLA-MMO-Seed-Path"
+REPOSITORIES = (PRIMARY_REPOSITORY, LEGACY_REPOSITORY)
+RELEASE_PAGE = f"https://github.com/{PRIMARY_REPOSITORY}/releases/latest"
+# Try the renamed repository first, then the old path while GitHub still
+# redirects it.  Keeping both for one transition release means 0.9.6/0.9.7
+# users can still reach the manifest after the account rename.
+MANIFEST_URLS = tuple(
+    f"https://github.com/{repository}/releases/latest/download/update.json"
+    for repository in REPOSITORIES
 )
-ALLOWED_DOWNLOAD_PREFIX = (
-    f"https://github.com/{REPOSITORY}/releases/download/"
+MANIFEST_URL = MANIFEST_URLS[0]
+# The transitional manifest may still use the legacy asset URL so that older
+# updaters accept it; the new updater accepts either repository.
+ALLOWED_DOWNLOAD_PREFIXES = tuple(
+    f"https://github.com/{repository}/releases/download/"
+    for repository in REPOSITORIES
 )
+ALLOWED_DOWNLOAD_PREFIX = ALLOWED_DOWNLOAD_PREFIXES[0]
 MAX_UPDATE_BYTES = 400 * 1024 * 1024
 USER_AGENT = "PLA-MMO-Seed-Path-Updater"
 
@@ -328,40 +339,43 @@ class UpdateService:
 
     # --------------------------------------------------------------- check
     def _fetch_manifest(self) -> dict:
-        request = urllib.request.Request(
-            MANIFEST_URL,
-            headers={
-                "User-Agent": f"{USER_AGENT}/{self.version}",
-                "Accept": "application/json",
-                "Cache-Control": "no-cache",
-            },
+        last_error: Exception | None = None
+        last_invalid = ""
+        for url in MANIFEST_URLS:
+            request = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": f"{USER_AGENT}/{self.version}",
+                    "Accept": "application/json",
+                    "Cache-Control": "no-cache",
+                },
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=20) as response:
+                    raw = response.read(1024 * 1024)
+            except Exception as exc:
+                last_error = exc
+                continue
+            try:
+                manifest = json.loads(raw.decode("utf-8-sig"))
+            except (UnicodeDecodeError, ValueError) as exc:
+                last_invalid = str(exc)
+                continue
+            if not isinstance(manifest, dict) or not manifest.get("version"):
+                last_invalid = "更新清单缺少版本信息。"
+                continue
+            if not isinstance(manifest.get("assets"), dict):
+                last_invalid = "更新清单缺少下载文件。"
+                continue
+            return manifest
+
+        if last_error is not None:
+            message, hint, detail = _friendly_error(last_error, "检查更新")
+            raise UpdateError(message, hint=hint, detail=detail) from last_error
+        raise UpdateError(
+            last_invalid or "更新清单内容无效。",
+            hint="请前往项目 Release 页面手动下载；可能是代理返回了错误页面。",
         )
-        try:
-            with urllib.request.urlopen(request, timeout=20) as response:
-                raw = response.read(1024 * 1024)
-        except BaseException as exc:
-            message, hint, detail = _friendly_error(exc, "检查更新")
-            raise UpdateError(message, hint=hint, detail=detail) from exc
-        try:
-            manifest = json.loads(raw.decode("utf-8-sig"))
-        except (UnicodeDecodeError, ValueError) as exc:
-            raise UpdateError(
-                "更新清单不是有效的 JSON。",
-                hint="请前往项目 Release 页面手动下载；可能是代理返回了错误页面。",
-                detail=str(exc),
-            ) from exc
-        if not isinstance(manifest, dict) or not manifest.get("version"):
-            raise UpdateError(
-                "更新清单缺少版本信息。",
-                hint="请前往项目 Release 页面手动下载。",
-            )
-        assets = manifest.get("assets")
-        if not isinstance(assets, dict):
-            raise UpdateError(
-                "更新清单缺少下载文件。",
-                hint="请前往项目 Release 页面手动下载。",
-            )
-        return manifest
 
     def _asset_for(self, manifest: dict, kind: str | None = None) -> dict | None:
         assets = manifest.get("assets") if isinstance(manifest.get("assets"), dict) else {}
@@ -452,7 +466,7 @@ class UpdateService:
             if desired_kind not in {"portable", "setup"}:
                 return {"ok": False, "error": "未知的更新包类型。"}
             url = str(asset.get("url") or "")
-            if not url.startswith(ALLOWED_DOWNLOAD_PREFIX):
+            if not any(url.startswith(prefix) for prefix in ALLOWED_DOWNLOAD_PREFIXES):
                 return {"ok": False, "error": "更新文件地址不是官方 GitHub Release。", "hint": "为安全起见已拒绝下载。"}
             filename = Path(str(asset.get("name") or "")).name
             if not filename or not re.search(r"\.(zip|exe)$", filename, re.I):
