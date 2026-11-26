@@ -6551,6 +6551,11 @@ async function startUpdateDownload() {
       setUpdateError(data.error || "无法开始下载。", data.hint || "");
       return;
     }
+    if (data.fell_back) {
+      showToast(data.fallback_reason
+        ? `增量更新不可用（${data.fallback_reason}），已改为下载完整包。`
+        : "增量更新不可用，已改为下载完整包。");
+    }
     renderUpdateDownload(data.download || { state: "starting", message: "准备下载更新…", percent: 0 });
     pollUpdateDownload();
   } catch (error) {

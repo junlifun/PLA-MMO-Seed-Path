@@ -6,19 +6,19 @@
 > 旧仓库仅保留测 Seed 相关功能；本项目同时支持联机采集 Seed、地图点位和闪光路径计算。
 
 - 作者：**君粒**
-- 当前版本：**v0.9.14**
+- 当前版本：**v0.9.15**
 - 许可证：**GPL v3.0**
 - 平台：Windows 10 / 11
 - 状态：公开仓库
 
 ## 下载
 
-- [Windows 安装版 v0.9.14](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.14/PLA-MMO-Seed-Path-0.9.14-Setup.exe)
-- [Windows 便携版 v0.9.14](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.14/PLA-MMO-Seed-Path-0.9.14-portable.zip)
-- [Pokeldn 精简运行时 r3](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.14/pokeldn-slim-v0.66.12-r3.zip)
-- [SHA256 校验文件](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.14/SHA256SUMS.txt)
+- [Windows 安装版 v0.9.15](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.15/PLA-MMO-Seed-Path-0.9.15-Setup.exe)
+- [Windows 便携版 v0.9.15](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.15/PLA-MMO-Seed-Path-0.9.15-portable.zip)
+- [Pokeldn 精简运行时 r3](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.15/pokeldn-slim-v0.66.12-r3.zip)
+- [SHA256 校验文件](https://github.com/junlifun/PLA-MMO-Seed-Path/releases/download/v0.9.15/SHA256SUMS.txt)
 
-> v0.9.14 新增相邻版本增量更新：0.9.13 用户只下载变化的程序文件；本地文件被修改或版本不匹配时自动改用完整包。从 v0.9.6 起可在应用内检查更新。
+> v0.9.15 是增量更新测试版：0.9.14 用户只需下载约 120 KB 的增量包；0.9.13 及更早版本、或首次安装仍需完整包一次。从 v0.9.6 起可在应用内检查更新。
 
 安装版按用户安装，不需要管理员权限，安装后从开始菜单或桌面快捷方式启动。
 
@@ -53,7 +53,7 @@ Start-PLA.bat
 
 - 安装版会下载 Setup，确认后退出并静默安装，完成后自动重新打开。
 - 便携版会下载 portable ZIP，在原目录替换程序文件，保留 `cache`、地图标注和自定义图片。
-- 相邻版本（例如 0.9.13 → 0.9.14）优先下载只包含变化文件的增量包；下载前会校验本地文件是否仍与基线一致。文件被修改过、版本跨度太大或增量包校验失败时，自动改用完整包。
+- 相邻版本（例如 0.9.14 → 0.9.15）优先下载只包含变化文件的增量包；下载前会校验本地文件是否仍与基线一致。文件被修改过、版本跨度太大或增量包校验失败时，自动改用完整包，并提示回退原因。
 - 网络下载失败时，可以打开 Release 页面手动下载，再在「手动更新包」中选择 ZIP 或 Setup；程序会检查包结构，ZIP 还会检查版本和可选的 SHA256。
 - v0.9.5 及更早版本没有更新中心，第一次升级仍需手动安装；从 v0.9.6 开始可以应用内更新。
 - GitHub 账号已改名为 `junlifun`；v0.9.10 同时兼容新旧仓库地址，0.9.6 / 0.9.7 仍可通过应用内更新升级。
@@ -99,9 +99,9 @@ python app.py
 输出在 `release`：
 
 ```text
-PLA-MMO-Seed-Path-0.9.14-Setup.exe
-PLA-MMO-Seed-Path-0.9.14-portable.zip
-PLA-MMO-Seed-Path-0.9.14-patch-from-0.9.13.zip
+PLA-MMO-Seed-Path-0.9.15-Setup.exe
+PLA-MMO-Seed-Path-0.9.15-portable.zip
+PLA-MMO-Seed-Path-0.9.15-patch-from-0.9.14.zip
 update.json
 SHA256SUMS.txt
 ```
