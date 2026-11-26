@@ -1,3 +1,20 @@
+# v0.9.10
+
+修复联机测 Seed 启动后以退出代码 2 结束的问题。
+
+## 修复
+
+- 精简运行时补齐 `python-netlink`（`netlink`）。`LDN/ldn/wlan.py` 在导入时会加载该模块，即使实际由 ESP32 托管网络也不能缺少。
+- 自带 Python 运行时同样内置 `netlink`，升级程序即可修复，无需删除已有的 `cache/pokeldn-slim`。
+- 精简运行时更新为 `pokeldn-slim-v0.66.12-r3.zip`。
+- 联机采集启动失败时，界面会显示真实的 `[pla]` 错误；退出代码 2 会附带最近一条错误详情，而不是只提示“请检查右侧输出”。
+
+## 说明
+
+- 本版本仍兼容 `junlifun` 与旧名 `Yuutalin` 的仓库地址。
+- 安装包未做商业代码签名，Windows SmartScreen 可能提示“未知发布者”，请核对 SHA256 后再运行。
+- 便携版建议解压到较短路径，例如 `D:\PLA-MMO-Seed-Path`。
+
 # v0.9.9
 
 修复联机测 Seed 启动时报 `No module named 'attrs'` 的问题。

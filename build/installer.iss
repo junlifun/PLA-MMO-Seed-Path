@@ -1,5 +1,5 @@
 #define AppName "PLA MMO Seed & Path"
-#define AppVersion "0.9.9"
+#define AppVersion "0.9.10"
 #define AppPublisher "君粒"
 #define PythonwExe "python\pythonw.exe"
 

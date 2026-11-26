@@ -29,6 +29,7 @@
 - [pywebview](https://github.com/r0x0r/pywebview)
 - [z3-solver / Z3](https://github.com/Z3Prover/z3)
 - [PyUSB](https://github.com/pyusb/pyusb)
+- [python-netlink](https://github.com/kinnay/netlink)（GPL-3.0；`vendor/python-netlink`，联机运行时 `LDN` 的依赖）
 
 每个依赖均保留其自身的许可证与版权声明；具体条款以对应上游仓库和发行包为准。
 

@@ -8,7 +8,7 @@ $BuildDir = Join-Path $Root "build"
 $DistDir = Join-Path $Root "dist-python"
 $Stage = Join-Path $DistDir "PLA-MMO-Seed-Path"
 $ReleaseDir = Join-Path $Root "release"
-$Version = "0.9.9"
+$Version = "0.9.10"
 $AppName = "PLA-MMO-Seed-Path"
 $PublicRepo = "junlifun/PLA-MMO-Seed-Path"
 $LegacyRepo = "Yuutalin/PLA-MMO-Seed-Path"
@@ -64,6 +64,13 @@ foreach ($file in @("clr.py", "bottle.py", "typing_extensions.py", "_cffi_backen
     $source = Join-Path $SourceSite $file
     if (Test-Path $source) { Copy-Item $source (Join-Path $Site $file) -Force }
 }
+
+# python-netlink is a pure-Python dependency of the vendored LDN host.  The
+# Windows build still imports it at module load time, even when the ESP32 radio
+# hosts the network, so it has to ship next to the other runtime packages.
+$netlinkSource = Join-Path $Root "vendor\python-netlink\netlink"
+if (-not (Test-Path $netlinkSource)) { throw "vendor\python-netlink\netlink is missing." }
+Copy-Item $netlinkSource (Join-Path $Site "netlink") -Recurse -Force
 
 # Copy package metadata needed by packages that query importlib.metadata.
 Get-ChildItem $SourceSite -Directory -Filter "*.dist-info" | Where-Object {

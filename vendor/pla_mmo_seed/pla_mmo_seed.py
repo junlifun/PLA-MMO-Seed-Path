@@ -1579,7 +1579,8 @@ class QuietHostOutput:
     """Hide noisy host packet logs while passing plugin/solver status through to Pokeldn."""
     _ERROR_WORDS = (
         "failed", "failure", "traceback", "exception", "error:",
-        "not found", "timed out", "permission denied", "失败", "无法",
+        "not found", "timed out", "permission denied", "missing dep",
+        "network did not come up", "bring-up failed", "失败", "无法",
     )
     _PLUGIN_PREFIXES = (
         "[seed", "[panel]", "[progress]", "[popup]", "pla seed finder",
@@ -1636,7 +1637,16 @@ class QuietHostOutput:
 
             # Keep routine [pla] packet chatter hidden, but show every plugin status and
             # the solver's progress/results even while the radio host is still closing.
-            if lower.startswith(self._PLUGIN_PREFIXES) or re.fullmatch(r"[0-9]{15,20}", stripped):
+            # Host startup errors are the exception: without this branch the real
+            # transport reason (for example a missing netlink module) stays hidden.
+            pla_error = lower.startswith("[pla]") and any(
+                word in lower for word in self._ERROR_WORDS
+            )
+            if (
+                pla_error
+                or lower.startswith(self._PLUGIN_PREFIXES)
+                or re.fullmatch(r"[0-9]{15,20}", stripped)
+            ):
                 self.target.write(line + "\n")
                 self.target.flush()
 
@@ -2353,8 +2363,10 @@ def collect_and_solve(args):
                 stop_requested = True
                 break
             if host_result not in (None, 0):
+                detail = output_filter.errors[-1] if output_filter.errors else ""
+                detail = f" 最近错误：{detail}" if detail else ""
                 host_exception = RuntimeError(
-                    f"联机主程序退出，代码 {host_result}。请检查右侧输出中的无线连接错误。"
+                    f"联机主程序退出，代码 {host_result}。{detail}"
                 )
                 break
             remaining = overall_deadline - time.monotonic()
