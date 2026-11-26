@@ -185,6 +185,66 @@
 }
 .btn-danger:hover:not(:disabled) { background: rgba(200, 75, 85, .15); }
 
+.update-install-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(9, 20, 30, .58);
+  backdrop-filter: blur(4px);
+}
+.update-install-overlay.hidden { display: none; }
+.update-install-dialog {
+  width: min(100%, 430px);
+  padding: 30px 30px 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-solid);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .28);
+  text-align: center;
+}
+.update-install-spinner {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 15px;
+  border: 3px solid rgba(80, 140, 190, .2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: update-install-spin .9s linear infinite;
+}
+.update-install-kicker {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+.update-install-dialog h2 { margin: 0 0 8px; font-size: 1.3rem; }
+.update-install-detail { margin: 0; color: var(--text); font-size: .88rem; line-height: 1.6; }
+.update-install-hint { margin: 10px 0 0; color: var(--muted); font-size: .76rem; line-height: 1.5; }
+.update-install-track {
+  height: 7px;
+  margin: 18px 0 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.update-install-bar {
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #65c98b, var(--accent));
+  animation: update-install-slide 1.2s ease-in-out infinite;
+}
+@keyframes update-install-spin { to { transform: rotate(360deg); } }
+@keyframes update-install-slide {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(300%); }
+}
+body.dark-mode .update-install-dialog { background: #101c28; }
+
 @media (max-width: 720px) {
   .update-banner { align-items: flex-start; flex-direction: column; }
   .update-banner-actions { width: 100%; }

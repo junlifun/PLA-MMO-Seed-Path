@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>洗翠闪光路径档案 · PLA MMO Path Finder · 君粒</title>
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.12') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.12') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.12') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.12') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.12-multi20') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='update.css', v='0.9.12') }}">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.13') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.13') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.13') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.13') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.13-multi20') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='update.css', v='0.9.13') }}">
 </head>
 <body data-theme="{{ appearance_theme|default('forest') }}"
       data-appearance-saved="{{ '1' if appearance_preferences_saved|default(false) else '0' }}"
@@ -1131,6 +1131,17 @@
 
 
 
+  <div id="update-install-overlay" class="update-install-overlay hidden" role="alertdialog" aria-modal="true" aria-labelledby="update-install-title">
+    <section class="update-install-dialog">
+      <div class="update-install-spinner" aria-hidden="true"></div>
+      <p class="update-install-kicker">UPDATE INSTALLER</p>
+      <h2 id="update-install-title">正在安装更新</h2>
+      <p id="update-install-detail" class="update-install-detail">正在关闭当前程序并启动安装程序…</p>
+      <div class="update-install-track" aria-hidden="true"><div class="update-install-bar"></div></div>
+      <p class="update-install-hint">安装程序接管后请稍候，完成后会自动重新启动。</p>
+    </section>
+  </div>
+
   <div id="result-detail-modal" class="result-detail-backdrop hidden" role="presentation">
     <section class="result-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="result-detail-title" tabindex="-1">
       <header class="result-detail-bar">
@@ -1140,8 +1151,8 @@
       <div id="result-detail-body" class="result-detail-body"></div>
     </section>
   </div>
-  <script src="{{ url_for('static', filename='result_view.js', v='0.9.12') }}"></script>
-  <script src="{{ url_for('static', filename='app.js', v='0.9.12-multi20') }}"></script>
+  <script src="{{ url_for('static', filename='result_view.js', v='0.9.13') }}"></script>
+  <script src="{{ url_for('static', filename='app.js', v='0.9.13-multi20') }}"></script>
 </body>
 </html>
 

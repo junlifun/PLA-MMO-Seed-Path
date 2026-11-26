@@ -845,7 +845,8 @@ class UpdateService:
                 pass
             os._exit(0)
 
-        threading.Timer(1.0, _exit).start()
+        # Give the WebView a moment to paint the install overlay before exit.
+        threading.Timer(2.0, _exit).start()
 
     # ------------------------------------------------------------- cleanup
     def _backup_dirs(self) -> list[Path]:
@@ -1046,7 +1047,7 @@ try {{
     Write-Log 'waiting for the application to exit'
     Wait-Process -Id {app_pid} -Timeout 60 -ErrorAction SilentlyContinue
     Start-Sleep -Milliseconds 900
-    $arguments = @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', ('/DIR="' + $target + '"'))
+    $arguments = @('/SILENT', '/SUPPRESSMSGBOXES', '/NORESTART', ('/DIR="' + $target + '"'))
     $process = Start-Process -FilePath $setup -ArgumentList $arguments -Wait -PassThru
     Write-Log ('setup exit code: ' + $process.ExitCode)
     $pythonw = Join-Path $target 'python\\pythonw.exe'

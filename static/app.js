@@ -6601,6 +6601,19 @@ function pollUpdateDownload() {
   updatePollTimer = window.setTimeout(tick, 300);
 }
 
+function showUpdateInstallOverlay(version = "") {
+  const overlay = $("update-install-overlay");
+  if (!overlay) return;
+  const label = version ? `v${String(version).replace(/^v/i, "")}` : "新版本";
+  if ($("update-install-title")) $("update-install-title").textContent = `正在安装 ${label}`;
+  if ($("update-install-detail")) $("update-install-detail").textContent = "正在准备安装程序，窗口即将关闭…";
+  overlay.classList.remove("hidden");
+}
+
+function hideUpdateInstallOverlay() {
+  $("update-install-overlay")?.classList.add("hidden");
+}
+
 async function installDownloadedUpdate() {
   const token = updateInstallToken;
   if (!token) {
@@ -6610,6 +6623,7 @@ async function installDownloadedUpdate() {
   if (!window.confirm("安装更新会关闭当前程序，完成后自动重新启动。cache、设置和地图标注会保留。继续吗？")) return;
   const install = $("update-install");
   if (install) { install.disabled = true; install.textContent = "正在准备退出…"; }
+  showUpdateInstallOverlay(updateCheckData?.latest_version || "");
   try {
     const data = await updateRequest("/api/update/install", {
       method: "POST",
@@ -6618,9 +6632,10 @@ async function installDownloadedUpdate() {
       timeoutMs: 20000,
     });
     if (!data.ok) throw new Error(data.error || "无法安装更新。");
+    if ($("update-install-detail")) $("update-install-detail").textContent = "安装程序已启动，完成后会自动重新打开程序…";
     if ($("update-status")) $("update-status").textContent = "程序即将退出，更新完成后会自动重新启动…";
-    showToast("程序即将退出并完成更新。", "ok");
   } catch (error) {
+    hideUpdateInstallOverlay();
     setUpdateError(`无法安装更新：${error.message}`, "请关闭占用程序文件的窗口后重试；也可以手动运行下载的 Setup 或解压 portable ZIP。");
     if (install) { install.disabled = false; install.textContent = "退出并安装"; }
   }
@@ -6718,6 +6733,7 @@ async function installManualUpdate() {
   if (!window.confirm(`将使用${label}覆盖当前程序，完成后自动重新启动。cache、设置和地图标注会保留。继续吗？`)) return;
   const install = $("update-manual-install");
   if (install) { install.disabled = true; install.textContent = "正在准备退出…"; }
+  showUpdateInstallOverlay(updateManualVersion || "");
   try {
     const data = await updateRequest("/api/update/install", {
       method: "POST",
@@ -6726,8 +6742,9 @@ async function installManualUpdate() {
       timeoutMs: 20000,
     });
     if (!data.ok) throw new Error(data.error || "无法安装更新。");
-    showToast("程序即将退出并完成更新。", "ok");
+    if ($("update-install-detail")) $("update-install-detail").textContent = "安装程序已启动，完成后会自动重新打开程序…";
   } catch (error) {
+    hideUpdateInstallOverlay();
     setUpdateError(`无法安装更新：${error.message}`, "请关闭占用程序文件的窗口后重试。");
     if (install) { install.disabled = false; install.textContent = "退出并安装"; }
   }

@@ -1590,11 +1590,19 @@ class QuietHostOutput:
         "press [enter] to exit", "==========", "【最终群体 seed】",
     )
 
-    def __init__(self, target, on_connected=None, on_leave_sent=None, on_switch_left=None):
+    def __init__(
+        self,
+        target,
+        on_connected=None,
+        on_leave_sent=None,
+        on_switch_left=None,
+        on_console_joined=None,
+    ):
         self.target = target
         self.on_connected = on_connected
         self.on_leave_sent = on_leave_sent
         self.on_switch_left = on_switch_left
+        self.on_console_joined = on_console_joined
         self._buffer = ""
         self._lock = threading.RLock()
         self._handle_lock = threading.RLock()
@@ -1624,11 +1632,12 @@ class QuietHostOutput:
             self.lines.append(stripped)
             if any(word in lower for word in self._ERROR_WORDS):
                 self.errors.append(stripped)
-            if self.on_connected and (
-                "console joined" in lower or "a console joined the network" in lower
-            ):
-                callback, self.on_connected = self.on_connected, None
-                callback()
+            if "console joined" in lower or "a console joined the network" in lower:
+                if self.on_console_joined:
+                    self.on_console_joined()
+                if self.on_connected:
+                    callback, self.on_connected = self.on_connected, None
+                    callback()
             if self.on_leave_sent and "session leave request (type 3)" in lower:
                 self.on_leave_sent()
             if self.on_switch_left and (
@@ -2153,23 +2162,89 @@ def collect_and_solve(args):
     selection_lock = threading.RLock()
     solver_state = {"started": False, "thread": None, "code": None, "error": None}
     solver_lock = threading.RLock()
+    partial_finish = threading.Event()
+    auto_finish_timer = {"timer": None}
+    auto_finish_delay = 6.0
 
     previous_stdout, previous_stderr = sys.stdout, sys.stderr
+
+    def selected_snapshot():
+        with selection_lock:
+            return len(selected_paths), list(selected_paths)
+
+    def cancel_auto_finish(reason=""):
+        timer = auto_finish_timer.get("timer")
+        auto_finish_timer["timer"] = None
+        if timer is None:
+            return
+        timer.cancel()
+        if reason:
+            print(f"[Seed] {reason}", flush=True)
+
+    def finish_partial_if_ready():
+        auto_finish_timer["timer"] = None
+        if four_found.is_set() or partial_finish.is_set():
+            return
+        with selection_lock:
+            count = len(selected_paths)
+            records = list(selected_paths)
+            if count < 2 or count >= 4:
+                return
+            partial_finish.set()
+        four_found.set()
+        print(
+            f"[Seed] 已离开交换且 {auto_finish_delay:.0f} 秒内没有新记录，"
+            f"自动用已收录的 {count} 只反推 Seed。",
+            flush=True,
+        )
+        update_collection_ui(
+            count,
+            f"已离开交换，正在用已收录的 {count} 只反推 Seed…",
+            "ok", records=records, phase="结束联机中",
+        )
+
+    def arm_auto_finish():
+        if four_found.is_set() or auto_finish_timer.get("timer") is not None:
+            return
+        count, records = selected_snapshot()
+        if count < 2 or count >= 4:
+            return
+        timer = threading.Timer(auto_finish_delay, finish_partial_if_ready)
+        timer.daemon = True
+        auto_finish_timer["timer"] = timer
+        timer.start()
+        print(
+            f"[Seed] 检测到已离开交换；{auto_finish_delay:.0f} 秒内没有新记录就"
+            f"自动计算已收录的 {count} 只（继续交换会自动取消）。",
+            flush=True,
+        )
+        update_collection_ui(
+            count,
+            f"检测到已离开交换；{auto_finish_delay:.0f} 秒内没有新记录就自动计算已收录的 {count} 只，"
+            "继续交换会自动取消。",
+            "info", records=records, phase="收集中",
+        )
 
     def on_connected():
         print("[Seed] Switch 已连接，请选择第一只最初捕获的宝可梦。", flush=True)
 
     def on_switch_left():
-        # Returning with B between Pokemon is normal; only treat the host's leave
-        # observation as final after the fourth record has triggered a leave request.
+        # Returning with B between Pokemon is normal. Arm a short grace timer
+        # instead of finishing immediately; a new record cancels it. After four
+        # records the normal graceful-leave path still handles the finish.
         if four_found.is_set() and leave_sent.is_set():
             switch_left.set()
+            return
+        arm_auto_finish()
 
     output_filter = QuietHostOutput(
         previous_stdout,
         on_connected=on_connected,
         on_leave_sent=leave_sent.set,
         on_switch_left=on_switch_left,
+        on_console_joined=lambda: cancel_auto_finish(
+            "Switch 已重新连接，已取消自动计算。"
+        ),
     )
 
     def start_solver_worker():
@@ -2257,8 +2332,9 @@ def collect_and_solve(args):
                     break
                 if digest in seen_digests:
                     continue
+                cancel_auto_finish("检测到新的宝可梦记录，已取消自动计算。")
                 with selection_lock:
-                    if len(selected_paths) >= 4:
+                    if partial_finish.is_set() or len(selected_paths) >= 4:
                         continue
                     index = len(selected_paths) + 1
                     try:
@@ -2397,6 +2473,7 @@ def collect_and_solve(args):
             )
             time.sleep(min(2.0, max(0.0, remaining)))
     finally:
+        cancel_auto_finish()
         output_filter.flush()
         sys.stdout, sys.stderr = previous_stdout, previous_stderr
         stop_monitor.set()
@@ -2413,6 +2490,27 @@ def collect_and_solve(args):
     with selection_lock:
         records = list(selected_paths[:4])
         count = len(records)
+
+    if partial_finish.is_set() and 2 <= count < 4:
+        try:
+            save_four_records(records, mons_dir)
+            (run_dir / ".complete").write_text("partial\n", encoding="utf-8")
+            print(
+                f"[Seed] 已结束交换，用已收录的 {count} 只宝可梦立即反推 Seed。",
+                flush=True,
+            )
+            update_collection_ui(
+                count,
+                f"已结束交换，正在用已收录的 {count} 只反推 Seed…",
+                "ok", records=records, phase="计算中",
+            )
+            return run_solver(root, mons_dir)
+        except Exception as exc:
+            print(f"[Seed 计算失败] {exc}", flush=True)
+            update_collection_ui(
+                count, f"反推失败：{exc}", "error", records=records, phase="计算失败",
+            )
+            return 1
 
     if count >= 4:
         solver_thread = solver_state.get("thread")

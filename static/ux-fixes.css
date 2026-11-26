@@ -28,6 +28,16 @@
 .link-seed-mon-card {
   min-height: 132px;
   padding: 12px;
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .25s ease;
+}
+/* 每收录一只，卡片底色轻微变绿；不改变文字和主题色的对比度。 */
+.link-seed-mon-card.is-captured {
+  border-color: #62b97a;
+  background: color-mix(in srgb, #3fa45b 10%, var(--surface, #fff));
+}
+body.dark-mode .link-seed-mon-card.is-captured {
+  border-color: #4f9e68;
+  background: color-mix(in srgb, #4fbf78 13%, var(--surface, #13202c));
 }
 .link-seed-mon-art {
   flex-basis: 46px;
