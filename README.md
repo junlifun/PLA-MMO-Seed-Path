@@ -142,6 +142,13 @@ cache/pokeldn-slim/
 
 `prod.keys` 必须由用户从自己的 Switch 导入，仓库和发行包都不包含。
 
+## 开发与交接文档
+
+- [开发与架构说明](docs/DEVELOPMENT.md)：技术栈、目录、启动链路、数据流、构建和常见坑。
+- [发布与更新流程](docs/RELEASE_PROCESS.md)：版本号位置、累计更新日志、增量更新、回滚和上传规则。
+- [交接说明](docs/HANDOFF.md)：当前状态、账号、路径、待确认事项和协作规则。
+- [累计更新日志](docs/RELEASE_NOTES.md) / [开发记录](docs/WORKLOG.md)。
+
 ## 使用到的开源项目
 
 | 项目 | 用途 | 许可证 |
@@ -157,7 +164,7 @@ cache/pokeldn-slim/
 
 - 本仓库为公开项目；
 - 不包含 `prod.keys`、用户存档、日志或个人数据；
-- 不包含 PokeIdn 完整发行包；
+- 不包含 Pokeldn 完整发行包；
 - 宝可梦名称、图像和相关商标归各自权利人所有；
 - 本项目为非官方工具，与 Nintendo / The Pokémon Company / GAME FREAK / Creatures Inc. 无隶属或认可关系。
 
