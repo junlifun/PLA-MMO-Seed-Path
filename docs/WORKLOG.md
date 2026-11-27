@@ -76,3 +76,7 @@
 - 修复源码开发模式（`PLA_DEV=1`）下浏览器标签页无限增开：Werkzeug 重载器每改一个文件就重启子进程并再次执行 `webbrowser.open`，构建期间会刷出大量 `127.0.0.1` 标签页。
   - 现在开发模式默认不自动开浏览器，只打印地址；确需自动打开时显式设置 `PLA_OPEN_BROWSER=1`，`PLA_NO_BROWSER=1` 仍可完全禁止。
 - 版本号 0.9.16；准备 0.9.15 → 0.9.16 增量包并发布。
+- 已发布：https://github.com/junlifun/PLA-MMO-Seed-Path/releases/tag/v0.9.16
+  - 增量包 519,124 字节（8 个文件），SHA256 `2320c6cc301cf940f03f2a64063ab26070b5be27d23f3209eb994ef9c086c6a2`。
+  - 已用线上增量包在 0.9.15 干净副本上实测：8 个文件全部更新，重启后 `/api/health` 为 `洗翠寻光 / 0.9.16`。
+  - 已只读比对用户安装版 `D:\PLA-MMO-Seed-Path` 的 7 个基线文件，全部与 patch 的 `source_sha256` 一致，应用内应能直接走增量更新。
