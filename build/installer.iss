@@ -1,5 +1,5 @@
-#define AppName "PLA MMO Seed & Path"
-#define AppVersion "0.9.15"
+#define AppName "洗翠寻光"
+#define AppVersion "0.9.16"
 #define AppPublisher "君粒"
 #define PythonwExe "python\pythonw.exe"
 
@@ -31,7 +31,7 @@ CloseApplications=yes
 RestartApplications=no
 VersionInfoVersion={#AppVersion}.0
 VersionInfoCompany={#AppPublisher}
-VersionInfoDescription=PLA MMO Seed & Path Installer
+VersionInfoDescription=洗翠寻光 Installer
 VersionInfoProductName={#AppName}
 VersionInfoProductVersion={#AppVersion}
 

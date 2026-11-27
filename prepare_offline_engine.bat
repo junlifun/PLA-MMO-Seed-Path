@@ -3,10 +3,10 @@ setlocal EnableExtensions
 chcp 65001 >nul
 set "PYTHONUTF8=1"
 set "PYTHONIOENCODING=utf-8"
-title PLA MMO Path Finder v0.7.3 - Local Engine Setup - Junli^&GPT
+title 洗翠寻光 v0.9.16 - Local Engine Setup - Junli^&GPT
 cd /d "%~dp0"
 echo.
-echo PLA MMO Path Finder - local RNG engine setup
+echo 洗翠寻光 - local RNG engine setup
 echo First setup downloads the open-source engine and resources.
 echo After the local calculation test passes, runtime path calculations can work offline.
 echo User Seed files, settings, and history are not overwritten.

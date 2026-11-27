@@ -1,6 +1,6 @@
 # 开发与架构说明
 
-> 适用版本：v0.9.15  
+> 适用版本：v0.9.16  
 > 最近核对：2026-11-27  
 > 本文只讲“代码怎么跑、改哪里”；发版和更新规则见 [RELEASE_PROCESS.md](RELEASE_PROCESS.md)，交接先看 [HANDOFF.md](HANDOFF.md)。
 

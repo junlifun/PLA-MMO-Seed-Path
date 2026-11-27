@@ -1,7 +1,7 @@
-' PLA MMO Path Finder - single visible-window launcher.
+' 洗翠寻光 - single visible-window launcher.
 ' No console window. Python runs app.py in desktop/webview mode.
 Option Explicit
-Const EXPECTED_VERSION = "0.9.5"
+Const EXPECTED_VERSION = "0.9.16"
 Dim fso, shell, folder, http, text, pos, start, version
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set shell = CreateObject("WScript.Shell")
@@ -27,11 +27,11 @@ Set http = Nothing
 
 If Len(version) > 0 Then
     If version = EXPECTED_VERSION Then
-        shell.AppActivate "PLA MMO 闪光路径助手"
+        shell.AppActivate "洗翠寻光"
         WScript.Quit 0
     End If
     MsgBox "An old version (" & version & ") is still running." & vbCrLf & _
-           "Close all PLA MMO Path Finder windows, then start again.", 16, "PLA MMO Path Finder"
+           "Close all 洗翠寻光 windows, then start again.", 16, "洗翠寻光"
     WScript.Quit 0
 End If
 
@@ -43,5 +43,5 @@ If Err.Number <> 0 Then
     shell.Run "pyw.exe -3 -u app.py", 1, False
 End If
 If Err.Number <> 0 Then
-    MsgBox "Python was not found. Install Python 3.10+ and enable Add to PATH.", 16, "PLA MMO Path Finder"
+    MsgBox "Python was not found. Install Python 3.10+ and enable Add to PATH.", 16, "洗翠寻光"
 End If

@@ -187,7 +187,7 @@ def make_fallback_candidates(encounter_path: Path) -> list[dict]:
 
 def main(source_arg: str | None = None) -> int:
     log("=" * 68)
-    log("PLA MMO 闪光路径助手：准备本地 RNG 引擎")
+    log("洗翠寻光：准备本地 RNG 引擎")
     log("首次准备需要联网下载一次公开源码和资源；安装完成后计算不请求远程 API。")
     log("本地 Seed 和设置不会被覆盖。")
 

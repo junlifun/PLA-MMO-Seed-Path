@@ -3,13 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>洗翠闪光路径档案 · PLA MMO Path Finder · 君粒</title>
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='app.ico', v='0.9.15') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.15') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.15') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.15') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.15-multi20') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='update.css', v='0.9.15') }}">
+  <title>洗翠寻光 · 闪光路径档案 · 君粒</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='app-icon.png', v='0.9.16') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='app-icon.png', v='0.9.16') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='0.9.16') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='product.css', v='0.9.16') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='themes.css', v='0.9.16') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='ux-fixes.css', v='0.9.16-multi20') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='update.css', v='0.9.16') }}">
 </head>
 <body data-theme="{{ appearance_theme|default('forest') }}"
       data-appearance-saved="{{ '1' if appearance_preferences_saved|default(false) else '0' }}"
@@ -886,10 +887,10 @@
 
               <section class="panel about-panel" aria-labelledby="about-panel-title">
                 <div class="about-header">
-                  <span class="about-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+                  <img class="about-app-icon" src="{{ url_for('static', filename='app-icon.png', v='0.9.16') }}" alt="" width="48" height="48">
                   <div class="about-title-group">
                     <h3 id="about-panel-title">关于本程序</h3>
-                    <p>洗翠闪光路线档案 · PLA MMO Path Finder</p>
+                    <p>洗翠寻光 · 闪光路径档案</p>
                   </div>
                   <span class="about-version">v{{ app_version }}</span>
                 </div>
@@ -917,7 +918,7 @@
     </main>
 
     <footer class="app-footer">
-      <span>PLA MMO Path Finder v{{ app_version }} · 作者：{{ author_name }}</span>
+      <span>洗翠寻光 v{{ app_version }} · 作者：{{ author_name }}</span>
       <span>本地仅监听 127.0.0.1 · 不读取 Switch 存档或实时内存</span>
     </footer>
   </div>
@@ -1151,8 +1152,8 @@
       <div id="result-detail-body" class="result-detail-body"></div>
     </section>
   </div>
-  <script src="{{ url_for('static', filename='result_view.js', v='0.9.15') }}"></script>
-  <script src="{{ url_for('static', filename='app.js', v='0.9.15-multi20') }}"></script>
+  <script src="{{ url_for('static', filename='result_view.js', v='0.9.16') }}"></script>
+  <script src="{{ url_for('static', filename='app.js', v='0.9.16-multi20') }}"></script>
 </body>
 </html>
 

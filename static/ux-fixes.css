@@ -2030,3 +2030,12 @@ body.dark-mode .spawn-tag.is-shiny {
   .global-alert-actions { width: 100%; }
 }
 
+
+.about-app-icon {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(5, 38, 36, .2);
+}

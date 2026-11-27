@@ -1,1 +1,1 @@
-"""PLA MMO Path Finder core package."""
+"""洗翠寻光 core package."""

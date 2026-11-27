@@ -33,7 +33,7 @@ from pla_mmo.pokemon_assets import PokemonAssetManager
 from pla_mmo.launcher import choose_local_port
 from pla_mmo.updater import UpdateError, UpdateService
 
-APP_VERSION = "0.9.15"
+APP_VERSION = "0.9.16"
 AUTHOR_NAME = "君粒"
 
 PROJECT_ROOT = get_project_root()
@@ -161,7 +161,7 @@ def create_app(test_config: dict | None = None) -> Flask:
         engine_status = local_engine.status()
         return jsonify({
             "ok": True,
-            "app": "PLA MMO Path Finder",
+            "app": "洗翠寻光",
             "version": APP_VERSION,
             "host_policy": "127.0.0.1 only",
             "calculation_engine": engine_status["engine"],
@@ -712,7 +712,7 @@ def create_app(test_config: dict | None = None) -> Flask:
             _append_runtime_error("读取本地引擎状态失败", exc)
 
         lines = [
-            "PLA MMO 闪光路径助手 - 诊断报告",
+            "洗翠寻光 - 诊断报告",
             f"报告生成时间：{datetime.now().astimezone().isoformat(timespec='seconds')}",
             f"应用版本：{APP_VERSION}",
             f"作者：{AUTHOR_NAME}",
@@ -1036,7 +1036,7 @@ def _run_desktop_window(app: Flask, url: str, port: int, development: bool = Fal
             "background_color": "#f4f4ed",
         }
 
-        window_title = f"PLA MMO 闪光路径助手 v{APP_VERSION} · {AUTHOR_NAME}"
+        window_title = f"洗翠寻光 v{APP_VERSION} · {AUTHOR_NAME}"
         window = webview.create_window(
             window_title,
             url,
@@ -1116,6 +1116,25 @@ def _desktop_mode_enabled() -> bool:
     return os.name == "nt"
 
 
+def _should_auto_open_browser(development: bool) -> bool:
+    """Decide whether to open a browser tab at startup.
+
+    In development mode the Werkzeug reloader restarts the whole process for
+    every touched file.  Opening a tab on each restart turned a build into a
+    storm of duplicate 127.0.0.1 tabs, so development only opens when asked
+    explicitly (``PLA_OPEN_BROWSER=1``) and only in the child process that
+    actually serves requests.
+    """
+    if os.environ.get("PLA_NO_BROWSER") == "1":
+        return False
+    if development:
+        return (
+            os.environ.get("PLA_OPEN_BROWSER") == "1"
+            and os.environ.get("WERKZEUG_RUN_MAIN") == "true"
+        )
+    return True
+
+
 def _configure_frozen_streams() -> None:
     """Keep diagnostics available when PyInstaller launches a windowed EXE."""
     if not getattr(sys, "frozen", False):
@@ -1161,7 +1180,7 @@ def _show_fatal_error(message: str) -> None:
         ctypes.windll.user32.MessageBoxW(
             None,
             message + f"\n\n日志目录：{get_log_dir()}",
-            f"PLA MMO Path Finder v{APP_VERSION} - 启动失败",
+            f"洗翠寻光 v{APP_VERSION} - 启动失败",
             0x10,
         )
     except Exception:
@@ -1184,7 +1203,7 @@ if __name__ == "__main__":
         raise SystemExit(2) from exc
     url = f"http://127.0.0.1:{port}"
     print("=" * 58)
-    print(f"PLA MMO 闪光路径助手 v{APP_VERSION}")
+    print(f"洗翠寻光 v{APP_VERSION}")
     if port != preferred_port:
         print(f"检测到端口 {preferred_port} 不可用，已切换到空闲端口 {port}。")
         print("这通常表示旧版本仍在运行；本次会使用当前版本的新端口。")
@@ -1206,7 +1225,7 @@ if __name__ == "__main__":
             print(f"[WARN] 独立窗口启动失败，改用浏览器：{exc}")
             _append_runtime_error("独立窗口启动失败，回退浏览器", exc, {"url": url})
             try:
-                if os.environ.get("PLA_NO_BROWSER") != "1" and (not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true"):
+                if _should_auto_open_browser(development):
                     threading.Timer(1.0, lambda: webbrowser.open(url)).start()
                 app.run(
                     host="127.0.0.1",
@@ -1220,7 +1239,10 @@ if __name__ == "__main__":
                 _show_fatal_error(str(fallback_exc))
                 raise SystemExit(3) from fallback_exc
     else:
-        if os.environ.get("PLA_NO_BROWSER") != "1" and (not development or os.environ.get("WERKZEUG_RUN_MAIN") == "true"):
+        if development:
+            print("开发模式：已关闭自动打开浏览器，请手动访问上面的地址。")
+            print("需要自动打开时设置 PLA_OPEN_BROWSER=1；完全禁止用 PLA_NO_BROWSER=1。")
+        elif _should_auto_open_browser(development):
             threading.Timer(1.0, lambda: webbrowser.open(url)).start()
         app.run(
             host="127.0.0.1",

@@ -5,13 +5,13 @@
 
 ## 1. 当前状态
 
-- 当前发布版本：**v0.9.15**，已发布并标记 Latest。
+- 当前发布版本：**v0.9.16**（产品名 **洗翠寻光**），已发布并标记 Latest。
 - 源码位置：`D:\Office-software\File-storage\model\deepseek-harness\default-workspace\_new-repo`
-- 本地稳定包：`D:\PLA-MMO-Seed-Path-Update\PLA-MMO-Seed-Path`（v0.9.15，含 `cache`）
-- 本地 Setup：`D:\PLA-MMO-Seed-Path-Update\PLA-MMO-Seed-Path-0.9.15-Setup.exe`
+- 本地稳定包：`D:\PLA-MMO-Seed-Path-Update\PLA-MMO-Seed-Path`（v0.9.16，含 `cache`）
+- 本地 Setup：`D:\PLA-MMO-Seed-Path-Update\PLA-MMO-Seed-Path-0.9.16-Setup.exe`
 - 用户已安装版本：`D:\PLA-MMO-Seed-Path`（v0.9.15）。**不要杀进程、不要替换文件、不要删 `cache`。**
 - 工作区已从约 10 GB 清理到约 0.34 GB；删掉的是旧构建、旧版本资产和 Edge 测试配置，源码、文档、当前发行包都在。
-- 目前没有待发布的程序改动；本次文档和工作区清理已本地提交，尚未推送。产品中文名和图标仍在等用户确认。
+- 目前没有待发布的程序改动；v0.9.16 已提交并推送。
 
 ## 2. 这个项目是什么
 
@@ -29,6 +29,8 @@ Windows 桌面工具，面向《宝可梦传说 阿尔宙斯》：
 
 - GitHub：`junlifun`（原 `Yuutalin`，已改名；仓库和 git 访问会重定向）
 - 作者显示名：`君粒`
+- 产品显示名：**洗翠寻光**（用户已确认；窗口标题、页面标题、关于页、安装器、README 都用它）
+- 应用图标：深色底、青色洗翠山形与闪光；源图 `docs/app-icon-source.jpg`，`build/make_icons.py` 生成 `static/app-icon.png`/`static/app.ico`
 - 主仓库：`https://github.com/junlifun/PLA-MMO-Seed-Path`
 - 旧资产前缀：`https://github.com/Yuutalin/PLA-MMO-Seed-Path/...`（兼容旧更新器，不要清理）
 - 本机 `gh` 可能仍显示旧用户名，这是本地认证缓存；实际 API 身份以 `junlifun` 为准。
@@ -83,21 +85,18 @@ Windows 桌面工具，面向《宝可梦传说 阿尔宙斯》：
 
 ## 4. 待确认/未完成
 
-1. **产品中文名和图标未定。**
-   - 之前建议过：洗翠光径（推荐）、洗翠寻光、闪光罗盘、洗翠星图、逐闪、闪迹档案。
-   - 推荐显示：`洗翠光径 · 闪光路径档案`。
-   - 用户确认前不要改窗口标题、关于页、安装器、README 显示名。
-   - 技术标识 `pla_mmo`、`PLA-MMO-Seed-Path`、更新 URL、数据目录不要跟着改，否则断更新/丢配置。
-2. **联机 2–3 只自动收尾需要真实 Switch 再验证。**
+1. **联机 2–3 只自动收尾需要真实 Switch 再验证。**
    - 已实现 6 秒等待 + 重新连上取消，避免把“按 B 返回”误判成结束。
    - 没有真实硬件长时间验证，接手后不要默认它百分百可靠。
-3. **安装器自动安装未做完整自动化验证。**
+2. **安装器自动安装未做完整自动化验证。**
    - 本环境运行 Setup 静默安装曾挂起；编译成功、用户手动安装成功。
    - 改安装器后至少手动安装/卸载一次。
-4. **增量更新只支持相邻版本。**
+3. **增量更新只支持相邻版本。**
    - 跨版本、首次安装、手动选择文件都走完整包；这是设计，不是缺陷。
-5. **没有代码签名。**
+4. **没有代码签名。**
    - 不要承诺“无警告安装”；让用户核对 SHA256。
+5. **新图标只验证到 512/32 px 预览。**
+   - 圆角遮罩和深色描边是脚本合成的；如果用户觉得边缘仍发白，先看 `docs/app-icon-source.jpg` 是否本来就带白角。
 
 ## 5. 常用路径
 
@@ -109,7 +108,7 @@ Windows 桌面工具，面向《宝可梦传说 阿尔宙斯》：
 | 累计日志 | `_new-repo\docs\RELEASE_NOTES.md` |
 | 开发记录 | `_new-repo\docs\WORKLOG.md` |
 | 本地稳定包 | `D:\PLA-MMO-Seed-Path-Update\PLA-MMO-Seed-Path` |
-| 本地 Setup | `D:\PLA-MMO-Seed-Path-Update\PLA-MMO-Seed-Path-0.9.15-Setup.exe` |
+| 本地 Setup | `D:\PLA-MMO-Seed-Path-Update\PLA-MMO-Seed-Path-0.9.16-Setup.exe` |
 | 用户安装版 | `D:\PLA-MMO-Seed-Path`（不要动） |
 | 用户数据 | `%LOCALAPPDATA%\PLA-MMO-Path-Finder` |
 | 测试启动 | `D:\PLA-MMO-Seed-Path-Update\启动测试版.bat` |
@@ -120,7 +119,11 @@ Windows 桌面工具，面向《宝可梦传说 阿尔宙斯》：
 
 ```powershell
 # 源码运行（浏览器调试）
+# PLA_DEV 只用于热重载，默认不再自动开标签页，避免构建时刷出一堆窗口。
 $env:PLA_DEV="1"; $env:PLA_PORT="5059"; python app.py
+
+# 开发模式确实需要自动开一次浏览器时：
+$env:PLA_DEV="1"; $env:PLA_OPEN_BROWSER="1"; $env:PLA_PORT="5059"; python app.py
 
 # 源码运行（原生窗口）
 $env:PLA_PORT="5059"; python app.py
