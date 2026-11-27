@@ -41,6 +41,12 @@ Name: "chinesesimplified"; MessagesFile: "ChineseSimplified.isl"
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "附加快捷方式："; Flags: unchecked
 
+; 0.9.15 及更早用旧显示名创建快捷方式。升级安装时删掉旧的，
+; 否则桌面/开始菜单会同时留着旧名字和旧图标。
+[InstallDelete]
+Type: files; Name: "{autodesktop}\PLA MMO Seed & Path.lnk"
+Type: files; Name: "{autoprograms}\PLA MMO Seed & Path.lnk"
+
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
